@@ -1,0 +1,48 @@
+{
+  "name": "hawk/psr7",
+  "type": "library",
+  "description": "PSR-7 HTTP message implementation",
+  "license": "MIT",
+  "keywords": [
+    "hawk",
+    "psr-7",
+    "psr7",
+    "message",
+    "request",
+    "response",
+    "stream",
+    "hawk-php",
+    "http",
+    "uri",
+    "url"
+  ],
+  "homepage": "https://github.com/hawkphp",
+  "authors": [
+    {
+      "name": "Ruslan Baimurzaev",
+      "email": "baimurzaev@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.1",
+    "psr/http-factory": "^1.0",
+    "psr/http-message": "^1.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^7.5"
+  },
+  "provide": {
+    "psr/http-message-implementation": "1.0",
+    "psr/http-factory-implementation": "1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Hawk\\Psr7\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Hawk\\Tests\\Psr7\\": "tests"
+    }
+  }
+}
