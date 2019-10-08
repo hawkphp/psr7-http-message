@@ -1,5 +1,11 @@
 <?php declare(strict_types=1);
 
+namespace Hawk\Psr7;
+
+use Hawk\Psr7\Factory\StreamFactory;
+use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UploadedFileInterface;
+
 /**
  * Class UploadedFile
  *
@@ -8,13 +14,6 @@
  * @link https://github.com/hawkphp/psr7-http-message GitHub main page
  *
  */
-
-namespace Hawk\Psr7;
-
-use Hawk\Psr7\Factory\StreamFactory;
-use Psr\Http\Message\StreamInterface;
-use Psr\Http\Message\UploadedFileInterface;
-
 class UploadedFile implements UploadedFileInterface
 {
 
