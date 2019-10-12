@@ -14,3 +14,4 @@ before_install:
 
 install:
     - composer update ${COMPOSER_FLAGS} --prefer-source --no-interaction
+    - composer test
