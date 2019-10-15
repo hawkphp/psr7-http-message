@@ -50,17 +50,12 @@ class UriTest extends TestCase
     /**
      *
      */
-    public function testWithSchemeInvalidType()
-    {
-        $this->getUri()->withScheme([]);
-    }
-
-    /**
-     *
-     */
     public function testWithSchemeInvalid()
     {
         $this->getUri()->withScheme('test');
+
+        // invalid type
+        $this->getUri()->withScheme([]);
     }
 
     /**
