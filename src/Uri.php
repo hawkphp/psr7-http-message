@@ -64,6 +64,7 @@ class Uri implements UriInterface
     /**
      * Parse a URL
      *
+     * Uri constructor.
      * @param string $uri
      */
     public function __construct(string $uri = '')
