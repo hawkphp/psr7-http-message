@@ -73,8 +73,7 @@ class UploadedFile implements UploadedFileInterface
         ?int $size = null,
         int $error = UPLOAD_ERR_OK,
         bool $sapi = false
-    )
-    {
+    ) {
         $this->file = $file;
         $this->name = $name;
         $this->type = $type;
