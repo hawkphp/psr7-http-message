@@ -70,7 +70,6 @@ class Uri implements UriInterface
     public function __construct(string $uri = '')
     {
         if ($uri !== '') {
-
             if (!$parts = parse_url($uri)) {
                 throw new InvalidArgumentException(sprintf("Unable to parse URI: %s", $uri));
             }
@@ -99,8 +98,7 @@ class Uri implements UriInterface
 
             if ($scheme !== '' && !array_key_exists($scheme, $this->schemes)) {
                 throw new InvalidArgumentException(
-                    sprintf('Scheme must be one of [%s] or empty string',
-                        join(",", array_keys($this->schemes)))
+                    sprintf('Scheme must be one of [%s] or empty string', join(",", array_keys($this->schemes)))
                 );
             }
         } else {
@@ -158,7 +156,6 @@ class Uri implements UriInterface
         return is_string($match) ? $match : '';
     }
 
-
     /**
      * Filters the query string of a URI.
      *
@@ -180,7 +177,6 @@ class Uri implements UriInterface
 
         return is_string($match) ? $match : '';
     }
-
 
     /**
      * @param $pattern
@@ -218,7 +214,6 @@ class Uri implements UriInterface
 
         return is_string($match) ? $match : '';
     }
-
 
     /**
      * {@inheritdoc}
@@ -284,7 +279,6 @@ class Uri implements UriInterface
 
         return false;
     }
-
 
     /**
      * {@inheritdoc}
@@ -400,7 +394,6 @@ class Uri implements UriInterface
         return $clone;
     }
 
-
     /**
      * {@inheritdoc}
      */
@@ -412,7 +405,6 @@ class Uri implements UriInterface
 
         return $clone;
     }
-
 
     /**
      * {@inheritdoc}
@@ -429,7 +421,6 @@ class Uri implements UriInterface
         return $clone;
     }
 
-
     /**
      * {@inheritdoc}
      */
@@ -442,7 +433,6 @@ class Uri implements UriInterface
         return $clone;
     }
 
-
     /**
      * {@inheritdoc}
      */
@@ -454,5 +444,4 @@ class Uri implements UriInterface
 
         return $clone;
     }
-
 }

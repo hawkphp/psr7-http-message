@@ -97,7 +97,6 @@ class Stream implements StreamInterface
             }
 
             return $this->getContents();
-
         } catch (\Exception $e) {
             return '';
         }
@@ -109,11 +108,9 @@ class Stream implements StreamInterface
     public function close()
     {
         if (isset($this->stream)) {
-
             if (is_resource($this->stream)) {
                 fclose($this->stream);
             }
-
             $this->detach();
         }
     }
@@ -124,13 +121,10 @@ class Stream implements StreamInterface
     public function detach()
     {
         $resource = $this->stream;
-
         $this->stream = null;
-
         $this->readable = null;
         $this->writable = null;
         $this->seekable = null;
-
         $this->meta = null;
         $this->size = null;
         $this->uri = null;
@@ -138,22 +132,18 @@ class Stream implements StreamInterface
         return $resource;
     }
 
-
     /**
      * {@inheritDoc}
      */
     public function getSize(): ?int
     {
         if ($this->stream && !$this->size) {
-
             $stats = fstat($this->stream);
-
             $this->size = isset($stats['size']) ? $stats['size'] : null;
         }
 
         return $this->size;
     }
-
 
     /**
      * {@inheritdoc}
@@ -197,7 +187,6 @@ class Stream implements StreamInterface
         }
     }
 
-
     /**
      * {@inheritdoc}
      */
@@ -217,7 +206,6 @@ class Stream implements StreamInterface
 
         return $written;
     }
-
 
     /**
      * {@inheritdoc}
@@ -242,7 +230,6 @@ class Stream implements StreamInterface
     {
         return $this->seekable;
     }
-
 
     /**
      * {@inheritdoc}
@@ -280,7 +267,6 @@ class Stream implements StreamInterface
         return $contents;
     }
 
-
     /**
      * {@inheritdoc}
      */
@@ -296,5 +282,4 @@ class Stream implements StreamInterface
 
         return array_key_exists($key, $this->meta) ? $this->meta[$key] : null;
     }
-
 }

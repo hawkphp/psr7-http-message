@@ -7,7 +7,6 @@ use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
-
 /**
  * Class Response
  * @package Hawk\Psr7
@@ -16,7 +15,6 @@ use Psr\Http\Message\StreamInterface;
  */
 class Response extends Message implements ResponseInterface
 {
-
     /**
      * @var int
      */
@@ -149,7 +147,6 @@ class Response extends Message implements ResponseInterface
         return $this->reasonPhrase;
     }
 
-
     /**
      * Filter HTTP status code
      * @param $code
@@ -169,5 +166,4 @@ class Response extends Message implements ResponseInterface
 
         return $code;
     }
-
 }
