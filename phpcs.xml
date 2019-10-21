@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="Hawk PHP code">
+    <description>Hawk PHP code</description>
+    <arg name="colors"/>
+    <arg value="p"/>
+    <rule ref="PSR2"/>
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
+    <file>src</file>
+    <file>tests</file>
+</ruleset>
