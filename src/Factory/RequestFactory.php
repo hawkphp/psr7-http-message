@@ -43,7 +43,6 @@ class RequestFactory implements RequestFactoryInterface
             : $streamFactory;
     }
 
-
     /**
      * {@inheritdoc}
      */

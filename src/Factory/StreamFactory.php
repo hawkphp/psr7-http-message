@@ -8,7 +8,6 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
 
-
 /**
  * Class StreamFactory
  * @package Hawk\Psr7\Factory
