@@ -17,7 +17,7 @@ class UriTest extends TestCase
     /**
      * @return Uri
      */
-    public function getFactoryUri()
+    public function factory()
     {
         return new Uri(self::URL);
     }
@@ -25,18 +25,18 @@ class UriTest extends TestCase
     public function testScheme()
     {
         // https
-        $this->assertEquals('https', $this->getFactoryUri()->getScheme());
+        $this->assertEquals('https', $this->factory()->getScheme());
 
         // http
-        $uri = $this->getFactoryUri()->withScheme('http');
+        $uri = $this->factory()->withScheme('http');
         $this->assertEquals('http', $uri->getScheme());
 
         // empty
-        $uri = $this->getFactoryUri()->withScheme('');
+        $uri = $this->factory()->withScheme('');
         $this->assertEquals('', $uri->getScheme());
 
         // removes suffix
-        $uri = $this->getFactoryUri()->withScheme('http://');
+        $uri = $this->factory()->withScheme('http://');
         $this->assertEquals('http', $uri->getScheme());
     }
 
@@ -46,111 +46,96 @@ class UriTest extends TestCase
      */
     public function testWithSchemeInvalid()
     {
-        $this->getFactoryUri()->withScheme('torrent');
+        $this->factory()->withScheme('torrent');
 
         // invalid type
-        $this->getFactoryUri()->withScheme(true);
+        $this->factory()->withScheme(true);
     }
 
     public function testGetAuthority()
     {
-        $this->assertEquals('user:pass@example.com', $this->getFactoryUri()->getAuthority());
+        $this->assertEquals('user:pass@example.com:81', $this->factory()->getAuthority());
     }
 
-    /*
-        public function testWithUserInfoAndGetUserInfo()
-        {
-            $uri = $this->getFactoryUri()->withUserInfo('hawk', 'pass');
+    public function testWithUserInfoAndGetUserInfo()
+    {
+        $uri = $this->factory()->withUserInfo('hawk', '123456');
+        $this->assertEquals('hawk:123456', $uri->getUserInfo());
+    }
 
-            $this->assertEquals('hawk:pass', $uri->getUserInfo());
-        }
+    public function testWithUserInfoClear()
+    {
+        $uri = $this->factory()->withUserInfo('hawk', '123456');
+        $uri = $uri->withUserInfo('');
+        $this->assertEquals('', $uri->getUserInfo());
+    }
 
+    public function testGetHost()
+    {
+        $this->assertEquals('example.com', $this->factory()->getHost());
+    }
 
-        public function testWithUserInfoClear()
-        {
-            $uri = $this->getFactoryUri()->withUserInfo('hawk', 'pass');
-            $uri = $uri->withUserInfo('');
-            $this->assertEquals('', $uri->getUserInfo());
-        }
+    public function testWithHost()
+    {
+        $uri = $this->factory()->withHost('example.com');
+        $this->assertEquals('example.com', $uri->getHost());
+    }
 
-        public function testGetHost()
-        {
-            $this->assertEquals('example.com', $this->getFactoryUri()->getHost());
-        }
+    public function testGetPort()
+    {
+        $uri = new Uri('https://www.example.com:8080');
+        $this->assertEquals(8080, $uri->getPort());
+    }
 
-        public function testWithHost()
-        {
-            $uri = $this->getFactoryUri()->withHost('example.com');
-            $this->assertEquals('example.com', $uri->getHost());
-        }
+    public function testGetPortWithoutPort()
+    {
+        $uri = new Uri('example.com');
+        $this->assertNull($uri->getPort());
+    }
 
-        public function testGetPort()
-        {
-            $uri = new Uri('https://www.example.com:8080');
-            $this->assertEquals(8080, $uri->getPort());
-        }
+    public function testWithPort()
+    {
+        $uri = $this->factory()->withPort(8080);
+        $this->assertEquals(8080, $uri->getPort());
+    }
 
+    public function testWithPortNull()
+    {
+        $uri = $this->factory()->withPort(null);
+        $this->assertEquals(null, $uri->getPort());
+    }
 
-        public function testGetPortWithoutPort()
-        {
-            $uri = new Uri('example.com');
-            $this->assertNull($uri->getPort());
-        }
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testWithPortInvalid()
+    {
+        $this->factory()->withPort(65555);
+    }
 
-        public function testWithPort()
-        {
-            $uri = $this->getFactoryUri()->withPort(8080);
-            $this->assertEquals(8080, $uri->getPort());
-        }
+    public function testGetPath()
+    {
+        $uri = new Uri('http://example.com/about');
+        $this->assertEquals('/about', $uri->getPath());
+    }
 
-        public function testWithPortNull()
-        {
-            $uri = $this->getFactoryUri()->withPort(null);
-            $this->assertEquals(null, $uri->getPort());
-        }
+    public function testWithPath()
+    {
+        $uri = $this->factory()->withPath('/about');
+        $this->assertEquals('/about', $uri->getPath());
 
+        // without prefix
+        $uri = $this->factory()->withPath('path');
+        $this->assertEquals('path', $uri->getPath());
 
-        public function testWithPortInvalid()
-        {
-            $this->getFactoryUri()->withPort(65699);
-        }
-
-
-        public function testWithPortInvalidString()
-        {
-            $this->getFactoryUri()->withPort('Port');
-        }
-
-
-        public function testGetPath()
-        {
-            $this->assertEquals('/foo/bar', $this->getFactoryUri()->getPath());
-        }
-
-
-        public function testWithPath()
-        {
-            $uri = $this->getFactoryUri()->withPath('/with/path');
-            $this->assertEquals('/with/path', $uri->getPath());
-        }
-
-
-        public function testWithPathWithoutPrefix()
-        {
-            $uri = $this->getFactoryUri()->withPath('path');
-            $this->assertEquals('path', $uri->getPath());
-        }
-
-
-        public function testWithPathEmptyValue()
-        {
-            $uri = $this->getFactoryUri()->withPath('');
-            $this->assertEquals('', $uri->getPath());
-        }
+        // path empty
+        $uri = $this->factory()->withPath('');
+        $this->assertEquals('', $uri->getPath());
+    }
 
     public function testToString()
     {
-        $uri = $this->getFactoryUri();
+        $uri = $this->factory();
         $this->assertEquals("https://user:pass@example.com:81/foo/bar/path.html?a=b&c=d#fragment", (string)$uri);
 
         $uri = $uri->withPath('/bar/foo/path.html');
@@ -160,49 +145,44 @@ class UriTest extends TestCase
         $this->assertEquals("https://user:pass@example.com:81/path/?a=b&c=d#fragment", (string)$uri);
     }
 
-        public function testGetQuery()
-        {
-            $this->assertEquals('a=b', $this->getFactoryUri()->getQuery());
-        }
+    public function testGetQuery()
+    {
+        $this->assertEquals('a=b&c=d', $this->factory()->getQuery());
+    }
 
-        public function testWithQuery()
-        {
-            $uri = $this->getFactoryUri()->withQuery('c=d');
-            $this->assertEquals('c=d', $uri->getQuery());
-        }
+    public function testWithQuery()
+    {
+        $uri = $this->factory()->withQuery('c=d');
+        $this->assertEquals('c=d', $uri->getQuery());
+    }
 
+    public function testWithQueryPrefixRemoves()
+    {
+        $uri = $this->factory()->withQuery('?test=prefix');
+        $this->assertEquals('test=prefix', $uri->getQuery());
+    }
 
-        public function testWithQueryPrefixRemoves()
-        {
-            $uri = $this->getFactoryUri()->withQuery('?test=prefix');
-            $this->assertEquals('test=prefix', $uri->getQuery());
-        }
+    public function testGetFragment()
+    {
+        $this->assertEquals('fragment', $this->factory()->getFragment());
+    }
 
+    public function testWithFragment()
+    {
+        $uri = $this->factory()->withFragment('fragment-with');
+        $this->assertEquals('fragment-with', $uri->getFragment());
+    }
 
-        public function testGetFragment()
-        {
-            $this->assertEquals('fragment', $this->getFactoryUri()->getFragment());
-        }
-
-
-        public function testWithFragment()
-        {
-            $uri = $this->getFactoryUri()->withFragment('fragment-with');
-            $this->assertEquals('fragment-with', $uri->getFragment());
-        }
-
-
-        public function testWithFragmentPrefixRemoves()
-        {
-            $uri = $this->getFactoryUri()->withFragment('#other-fragment');
-            $this->assertEquals('other-fragment', $uri->getFragment());
-        }
+    public function testWithFragmentPrefixRemoves()
+    {
+        $uri = $this->factory()->withFragment('#other-fragment');
+        $this->assertEquals('other-fragment', $uri->getFragment());
+    }
 
 
-        public function testWithFragmentEmpty()
-        {
-            $uri = $this->getFactoryUri()->withFragment('');
-            $this->assertEquals('', $uri->getFragment());
-        }
-    */
+    public function testWithFragmentEmpty()
+    {
+        $uri = $this->factory()->withFragment('');
+        $this->assertEquals('', $uri->getFragment());
+    }
 }
