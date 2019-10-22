@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit colors="true"
+         verbose="true"
          backupGlobals="false"
          backupStaticAttributes="false"
          convertErrorsToExceptions="true"
@@ -10,24 +11,14 @@
          syntaxCheck="false"
          bootstrap="vendor/autoload.php">
     <testsuites>
-        <testsuite name="Main Test Suite">
-            <directory>./Tests/</directory>
+        <testsuite name="Hawk Test Suite">
+            <directory>tests</directory>
         </testsuite>
     </testsuites>
 
-    <groups>
-        <exclude>
-            <group>benchmark</group>
-        </exclude>
-    </groups>
-
     <filter>
         <whitelist>
-            <directory>./</directory>
-            <exclude>
-                <directory>./Tests</directory>
-                <directory>./vendor</directory>
-            </exclude>
+            <directory suffix=".php">src/</directory>
         </whitelist>
     </filter>
 </phpunit>
