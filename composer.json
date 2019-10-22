@@ -29,7 +29,7 @@
     "psr/http-message": "^1.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "^8"
+    "phpunit/phpunit": "^7"
   },
   "provide": {
     "psr/http-message-implementation": "1.0",
@@ -44,5 +44,11 @@
     "psr-4": {
       "Hawk\\Tests\\Psr7\\": "tests"
     }
+  },
+  "scripts": {
+    "test": [
+      "@phpunit"
+    ],
+    "phpunit": "phpunit"
   }
 }
