@@ -127,13 +127,29 @@ class Uri implements UriInterface
      */
     private function filterPort($port): ?int
     {
-        if (is_null($port) || (is_integer($port) && $port > 0 && $port < 65536)) {
-            return $port;
+        if (is_null($port)) {
+            return null;
         }
 
-        throw new InvalidArgumentException(
-            \sprintf('Invalid port: %d. Port must be between 1 and 65535 or null', $port)
-        );
+        $port = (int)$port;
+
+        if (0 > $port || 65535 < $port) {
+            throw new \InvalidArgumentException(
+                \sprintf('Invalid port: %d. Port must be between 1 and 65535 or null', $port)
+            );
+        }
+
+        return $this->isNonStandardPort($this->scheme, $port) ? $port : null;
+    }
+
+    /**
+     * @param string $scheme
+     * @param int $port
+     * @return bool
+     */
+    private function isNonStandardPort(string $scheme, int $port): bool
+    {
+        return !isset($this->schemes[$scheme]) || $port !== $this->schemes[$scheme];
     }
 
     /**
@@ -165,15 +181,11 @@ class Uri implements UriInterface
      */
     private function filterQuery($query): string
     {
-
         if (!is_string($query)) {
             throw new InvalidArgumentException('Query must be a string.');
         }
 
-        $match = $this->pregReplace(
-            '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/',
-            $query
-        );
+        $match = $this->pregReplace('/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/', $query);
 
         return is_string($match) ? $match : '';
     }
@@ -185,13 +197,9 @@ class Uri implements UriInterface
      */
     private function pregReplace($pattern, $query)
     {
-        return preg_replace_callback(
-            $pattern,
-            function ($match) {
-                return rawurlencode($match[0]);
-            },
-            $query
-        );
+        return preg_replace_callback($pattern, function ($match) {
+            return rawurlencode($match[0]);
+        }, $query);
     }
 
     /**
@@ -261,23 +269,7 @@ class Uri implements UriInterface
      */
     public function getPort(): ?int
     {
-        return ($this->port && !$this->hasStandardPort())
-            ? $this->port
-            : null;
-    }
-
-    /**
-     * @return bool
-     */
-    protected function hasStandardPort(): bool
-    {
-        foreach ($this->schemes as list($scheme, $port)) {
-            if ($this->port === $port && $this->scheme === $scheme) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->port;
     }
 
     /**
