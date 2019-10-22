@@ -13,6 +13,8 @@ use Psr\Http\Message\UriInterface;
  */
 class Uri implements UriInterface
 {
+    private const FILTER_PATTERN = '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/';
+
     /**
      * @var string
      */
@@ -70,16 +72,18 @@ class Uri implements UriInterface
     public function __construct(string $uri = '')
     {
         if ($uri !== '') {
+            $uri = \strtolower($uri);
+
             if (!$parts = parse_url($uri)) {
                 throw new InvalidArgumentException(sprintf("Unable to parse URI: %s", $uri));
             }
 
-            $this->scheme = $this->filterScheme($parts['scheme']);
-            $this->host = $this->filterHost($parts['host']);
-            $this->port = $this->filterPort($parts['port']);
-            $this->path = $this->filterPath($parts['path']);
-            $this->query = $this->filterQuery($parts['query']);
-            $this->fragment = $this->filterFragment($parts['fragment']);
+            $this->scheme = isset($parts['scheme']) ? $this->filterScheme($parts['scheme']) : '';
+            $this->host = isset($parts['host']) ? $this->filterHost($parts['host']) : '';
+            $this->port = isset($parts['port']) ? $this->filterPort($parts['port']) : null;
+            $this->path = isset($parts['path']) ? $this->filterPath($parts['path']) : '';
+            $this->query = isset($parts['query']) ? $this->filterQuery($parts['query']) : '';
+            $this->fragment = isset($parts['fragment']) ? $this->filterFragment($parts['fragment']) : '';
 
             $this->user = (isset($parts['pass']) && $parts['pass'] !== '')
                 ? $parts['user'] . ':' . $parts['pass']
@@ -138,18 +142,9 @@ class Uri implements UriInterface
                 \sprintf('Invalid port: %d. Port must be between 1 and 65535 or null', $port)
             );
         }
+        $scheme = $this->scheme;
 
-        return $this->isNonStandardPort($this->scheme, $port) ? $port : null;
-    }
-
-    /**
-     * @param string $scheme
-     * @param int $port
-     * @return bool
-     */
-    private function isNonStandardPort(string $scheme, int $port): bool
-    {
-        return !isset($this->schemes[$scheme]) || $port !== $this->schemes[$scheme];
+        return (!isset($this->schemes[$scheme]) || $port !== $this->schemes[$scheme]) ? $port : null;
     }
 
     /**
@@ -185,7 +180,7 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('Query must be a string.');
         }
 
-        $match = $this->pregReplace('/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/', $query);
+        $match = $this->pregReplace(self::FILTER_PATTERN, $query);
 
         return is_string($match) ? $match : '';
     }
@@ -215,10 +210,7 @@ class Uri implements UriInterface
             throw new InvalidArgumentException('Fragment must be a string.');
         }
 
-        $match = $this->pregReplace(
-            '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/',
-            ltrim($fragment, '#')
-        );
+        $match = $this->pregReplace(self::FILTER_PATTERN, ltrim($fragment, '#'));
 
         return is_string($match) ? $match : '';
     }
