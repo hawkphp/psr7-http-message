@@ -70,5 +70,4 @@ class ServerRequestFactory implements ServerRequestFactoryInterface
 
         return new Request($method, $uri, $headers, $serverParams, $body);
     }
-
 }

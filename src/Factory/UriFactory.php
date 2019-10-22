@@ -7,7 +7,6 @@ use InvalidArgumentException;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
 
-
 /**
  * Class UriFactory
  * @package Hawk\Psr7\Factory
@@ -27,5 +26,4 @@ class UriFactory implements UriFactoryInterface
 
         return new Uri($uri);
     }
-
 }

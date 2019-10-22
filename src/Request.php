@@ -88,8 +88,7 @@ class Request extends Message implements ServerRequestInterface
         $headers,
         array $serverParams,
         StreamInterface $body
-    )
-    {
+    ) {
         $this->method = $this->filterMethod($method);
         $this->uri = (is_string($uri)) ? new Uri($uri) : $uri;
         $this->headers = $headers;
