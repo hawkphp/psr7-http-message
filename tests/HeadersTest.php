@@ -80,5 +80,4 @@ class HeadersTest extends TestCase
         $this->assertEquals(true, $headers->hasHeader('Accept'));
         $this->assertEquals(false, $headers->hasHeader('Connection'));
     }
-
 }

@@ -18,12 +18,12 @@ use Psr\Http\Message\UriInterface;
 class RequestFactory implements RequestFactoryInterface
 {
     /**
-     * @var UriFactory|UriFactoryInterface|null
+     * @var UriFactory|UriFactoryInterface
      */
     protected $uriFactory;
 
     /**
-     * @var StreamFactory|StreamFactoryInterface|null
+     * @var StreamFactory|StreamFactoryInterface
      */
     protected $streamFactory;
 
@@ -34,13 +34,8 @@ class RequestFactory implements RequestFactoryInterface
      */
     public function __construct(StreamFactoryInterface $streamFactory = null, UriFactoryInterface $uriFactory = null)
     {
-        $this->uriFactory = (!$uriFactory instanceof UriFactoryInterface)
-            ? new UriFactory()
-            : $uriFactory;
-
-        $this->streamFactory = (!$streamFactory instanceof StreamFactoryInterface)
-            ? new StreamFactory()
-            : $streamFactory;
+        $this->uriFactory = (!$uriFactory) ? new UriFactory() : $uriFactory;
+        $this->streamFactory = (!$streamFactory) ? new StreamFactory() : $streamFactory;
     }
 
     /**

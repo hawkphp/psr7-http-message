@@ -99,17 +99,21 @@ class Response extends Message implements ResponseInterface
         599 => 'Network Connect Timeout Error',
     ];
 
+    private $message = '';
+
     /**
      * Response constructor.
      * @param int $code
-     * @param null $headers
+     * @param string $message
+     * @param array $headers
      * @param StreamInterface|null $body
      */
-    public function __construct(int $code = 200, $headers = null, StreamInterface $body = null)
+    public function __construct(int $code = 200, $message = '', $headers = [], StreamInterface $body = null)
     {
         $this->statusCode = $this->filterStatus($code);
         $this->headers = $headers ? $headers : new Headers();
         $this->body = $body ? $body : (new StreamFactory())->createStream();
+        $this->message = $message;
     }
 
     /**

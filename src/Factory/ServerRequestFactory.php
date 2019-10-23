@@ -14,12 +14,12 @@ use Psr\Http\Message\UriInterface;
 class ServerRequestFactory implements ServerRequestFactoryInterface
 {
     /**
-     * @var StreamFactory|StreamFactoryInterface|null
+     * @var StreamFactory|StreamFactoryInterface
      */
     protected $streamFactory;
 
     /**
-     * @var UriFactory|UriFactoryInterface|null
+     * @var UriFactory|UriFactoryInterface
      */
     protected $uriFactory;
 
