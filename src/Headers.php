@@ -133,7 +133,7 @@ class Headers
      */
     public function hasHeader(string $name): bool
     {
-        return isset($this->headers[strtolower($name)]);
+        return isset($this->headerNames[strtolower($name)]);
     }
 
     /**
@@ -149,7 +149,7 @@ class Headers
      * @param $values
      * @return array
      */
-    protected function validateAndTrimHeader(string $name, $values): array
+    private function validateAndTrimHeader(string $name, $values): array
     {
         $headerValues = [];
 
@@ -185,7 +185,7 @@ class Headers
      *
      * @param $name
      */
-    public function validateHeaderName($name)
+    private function validateHeaderName($name)
     {
         if (!is_string($name) || $name === '' || preg_match("@^[!#$%&'*+.^_`|~0-9A-Za-z-]+$@", $name) !== 1) {
             throw new InvalidArgumentException('Header name must be an RFC 7230 compatible string');
@@ -195,9 +195,8 @@ class Headers
     /**
      * @param $value
      */
-    public function validateHeaderValue($value)
+    private function validateHeaderValue($value)
     {
-
         if (is_array($value) && empty($value)) {
             throw new InvalidArgumentException(
                 'Header values must be a string or an array of strings, empty array given.'
