@@ -50,7 +50,7 @@ class Headers
 
     /**
      * @param string $name
-     * @param $value
+     * @param mixed $value
      * @return Headers
      */
     public function addHeader(string $name, $value): self
@@ -108,7 +108,7 @@ class Headers
 
     /**
      * @param string $name
-     * @param $value
+     * @param mixed $value
      * @return Headers
      */
     public function setHeader(string $name, $value): self
@@ -146,7 +146,7 @@ class Headers
 
     /**
      * @param string $name
-     * @param $values
+     * @param mixed $values
      * @return array
      */
     private function validateAndTrimHeader(string $name, $values): array
@@ -183,7 +183,7 @@ class Headers
      *
      * https://tools.ietf.org/html/rfc7230#section-3.2.6
      *
-     * @param $name
+     * @param string $name
      */
     private function validateHeaderName($name)
     {
@@ -193,7 +193,7 @@ class Headers
     }
 
     /**
-     * @param $value
+     * @param mixed $value
      */
     private function validateHeaderValue($value)
     {
