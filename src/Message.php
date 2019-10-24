@@ -42,8 +42,8 @@ abstract class Message implements MessageInterface
     protected $body;
 
     /**
-     * @param $name
-     * @param $value
+     * @param string $name
+     * @param mixed $value
      */
     public function __set($name, $value): void
     {
