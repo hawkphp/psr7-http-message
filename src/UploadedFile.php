@@ -18,17 +18,17 @@ class UploadedFile implements UploadedFileInterface
 {
 
     /**
-     * @var
+     * @var StreamInterface
      */
     private $stream;
 
     /**
-     * @var
+     * @var string|null
      */
     private $name;
 
     /**
-     * @var
+     * @var string
      */
     private $file;
 
@@ -48,7 +48,7 @@ class UploadedFile implements UploadedFileInterface
     private $moved = false;
 
     /**
-     * @var
+     * @var int
      */
     private $error = UPLOAD_ERR_OK;
 
@@ -133,7 +133,7 @@ class UploadedFile implements UploadedFileInterface
     }
 
     /**
-     * @param $targetPath
+     * @param string $targetPath
      */
     private function moveActions($targetPath): void
     {
@@ -154,7 +154,7 @@ class UploadedFile implements UploadedFileInterface
     }
 
     /**
-     * @param $targetPath
+     * @param string $targetPath
      */
     private function renameFile($targetPath): void
     {
@@ -166,7 +166,7 @@ class UploadedFile implements UploadedFileInterface
     }
 
     /**
-     * @param $targetPath
+     * @param string $targetPath
      */
     private function copyStream($targetPath): void
     {
@@ -184,7 +184,7 @@ class UploadedFile implements UploadedFileInterface
     }
 
     /**
-     * @param $targetPath
+     * @param string $targetPath
      */
     private function moveFile($targetPath): void
     {
