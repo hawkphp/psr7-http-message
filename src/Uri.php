@@ -92,28 +92,28 @@ class Uri implements UriInterface
     }
 
     /**
-     * @param $scheme
+     * @param string $scheme
      * @return string
      */
     private function filterScheme($scheme): string
     {
-        if (is_string($scheme)) {
-            $scheme = strtolower(str_replace('://', '', $scheme));
+        if (!is_string($scheme)) {
+            throw new InvalidArgumentException('Uri scheme must be a string');
+        }
 
-            if ($scheme !== '' && !array_key_exists($scheme, $this->schemes)) {
-                throw new InvalidArgumentException(
-                    sprintf('Scheme must be one of [%s] or empty string', join(",", array_keys($this->schemes)))
-                );
-            }
-        } else {
-            $scheme = '';
+        $scheme = strtolower(str_replace('://', '', $scheme));
+
+        if ($scheme !== '' && !array_key_exists($scheme, $this->schemes)) {
+            throw new InvalidArgumentException(
+                sprintf('Scheme must be one of [%s] or empty string', join(",", array_keys($this->schemes)))
+            );
         }
 
         return $scheme;
     }
 
     /**
-     * @param $host
+     * @param string $host
      * @return string
      */
     private function filterHost($host): string
@@ -126,7 +126,7 @@ class Uri implements UriInterface
     }
 
     /**
-     * @param $port
+     * @param int|null $port
      * @return int|null
      */
     private function filterPort($port): ?int
@@ -186,8 +186,8 @@ class Uri implements UriInterface
     }
 
     /**
-     * @param $pattern
-     * @param $query
+     * @param string $pattern
+     * @param string $query
      * @return string|string[]|null
      */
     private function pregReplace($pattern, $query)
@@ -243,9 +243,7 @@ class Uri implements UriInterface
      */
     public function getUserInfo(): string
     {
-        return (!is_null($this->password) && $this->password !== '')
-            ? $this->user . ':' . $this->password
-            : $this->user;
+        return ($this->password !== '') ? $this->user . ':' . $this->password : $this->user;
     }
 
     /**
@@ -336,12 +334,11 @@ class Uri implements UriInterface
 
     /**
      * Join components in one string
-     *
-     * @param $scheme
-     * @param $authority
-     * @param $path
-     * @param $query
-     * @param $fragment
+     * @param string $scheme
+     * @param string $authority
+     * @param string $path
+     * @param string $query
+     * @param string $fragment
      * @return string
      */
     public function joinComponents($scheme, $authority, $path, $query, $fragment)
