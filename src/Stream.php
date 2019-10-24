@@ -28,7 +28,7 @@ class Stream implements StreamInterface
     private const WRITABLE_MODES = '/a|w|r\+|rb\+|rw|x|c/';
 
     /**
-     * @var
+     * @var StreamInterface
      */
     private $stream;
 
@@ -38,7 +38,7 @@ class Stream implements StreamInterface
     private $size;
 
     /**
-     * @var
+     * @var array|null
      */
     private $meta;
 
@@ -65,7 +65,7 @@ class Stream implements StreamInterface
 
     /**
      * Stream constructor
-     * @param $stream
+     * @param StreamInterface|null|resource $stream
      * @param array $options
      */
     public function __construct($stream, array $options = [])
