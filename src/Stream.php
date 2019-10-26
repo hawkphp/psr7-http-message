@@ -254,13 +254,13 @@ class Stream implements StreamInterface
      */
     public function getContents(): string
     {
-        $contents = false;
+        $contents = '';
 
-        if ($this->stream) {
+        if (is_resource($this->stream)) {
             $contents = stream_get_contents($this->stream);
         }
 
-        if (!is_string($contents)) {
+        if (!$contents) {
             throw new RuntimeException('Failed to get contents of stream');
         }
 
@@ -272,11 +272,15 @@ class Stream implements StreamInterface
      */
     public function getMetadata($key = null)
     {
-        if (!$this->stream) {
-            return null;
+        if (!isset($this->stream) || is_resource($this->stream)) {
+            return $key ? null : [];
         }
 
-        if (!$key) {
+        $this->meta = is_resource($this->stream)
+            ? stream_get_meta_data($this->stream)
+            : [];
+
+        if (is_null($key)) {
             return $this->meta;
         }
 
