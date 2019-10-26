@@ -26,5 +26,4 @@ class MessageMock extends Message
      * @var string
      */
     public $protocolVersion;
-
 }
