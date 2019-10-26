@@ -76,9 +76,9 @@ class Request extends Message implements ServerRequestInterface
 
     /**
      * Request constructor.
-     * @param $method
-     * @param $uri
-     * @param $headers
+     * @param string $method
+     * @param UriInterface $uri
+     * @param Headers $headers
      * @param array $serverParams
      * @param StreamInterface $body
      */
@@ -164,7 +164,7 @@ class Request extends Message implements ServerRequestInterface
     }
 
     /**
-     * @param $method
+     * @param string $method
      * @return string
      */
     protected function filterMethod($method)
