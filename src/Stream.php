@@ -66,19 +66,20 @@ class Stream implements StreamInterface
     /**
      * Stream constructor
      * @param StreamInterface|null|resource $stream
-     * @param array $options
+     * @param array $metadata
      */
-    public function __construct($stream, array $options = [])
+    public function __construct($stream, array $metadata = [])
     {
         if (!is_resource($stream)) {
             throw new InvalidArgumentException('Stream must be a resource');
         }
 
-        if (isset($options['size'])) {
-            $this->size = $options['size'];
+        if (isset($metadata['size'])) {
+            $this->size = $metadata['size'];
         }
 
-        $this->meta = array_merge($options['metadata'], stream_get_meta_data($this->stream));
+        $this->meta = array_merge($metadata, stream_get_meta_data($stream));
+
         $this->stream = $stream;
         $this->seekable = $this->meta['seekable'];
         $this->readable = (bool)preg_match(self::READABLE_MODES, $this->meta['mode']);
