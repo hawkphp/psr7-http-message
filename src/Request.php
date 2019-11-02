@@ -290,6 +290,12 @@ class Request extends Message implements ServerRequestInterface
      */
     public function withParsedBody($data)
     {
+        if (!is_null($data) && !is_object($data) && !is_array($data)) {
+            throw new InvalidArgumentException(
+                'Parsed body parameter must be object, array or null'
+            );
+        }
+
         $clone = clone $this;
         $clone->parsedBody = $data;
 
