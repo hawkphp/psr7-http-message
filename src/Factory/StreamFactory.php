@@ -53,9 +53,7 @@ class StreamFactory implements StreamFactoryInterface
     public function createStreamFromResource($handle): StreamInterface
     {
         if (!is_resource($handle)) {
-            throw new InvalidArgumentException(
-                'Parameter 1 of StreamFactory::createStreamFromResource() must be a resource.'
-            );
+            throw new InvalidArgumentException('Parameter 1 has no resource.');
         }
 
         return new Stream($handle);
