@@ -18,17 +18,19 @@ class StreamFactory implements StreamFactoryInterface
 {
     /**
      * {@inheritdoc}
-     *
-     * @throws RuntimeException
      */
     public function createStream(string $content = ''): StreamInterface
     {
-        $resource = fopen('php://temp', 'rw+');
+        $handle = fopen('php://temp', 'r+');
 
-        fwrite($resource, $content);
-        rewind($resource);
+        if (!is_resource($handle)) {
+            throw new RuntimeException('Unable to open temporary file stream');
+        }
 
-        return $this->createStreamFromResource($resource);
+        fwrite($handle, $content);
+        rewind($handle);
+
+        return $this->createStreamFromResource($handle);
     }
 
     /**
@@ -36,26 +38,26 @@ class StreamFactory implements StreamFactoryInterface
      */
     public function createStreamFromFile(string $filename, string $mode = 'r'): StreamInterface
     {
-        $resource = fopen($filename, $mode);
+        $handle = fopen($filename, $mode);
 
-        if (!is_resource($resource)) {
+        if (!is_resource($handle)) {
             throw new RuntimeException(sprintf("Could not create resource from file %s", $filename));
         }
 
-        return $this->createStreamFromResource($resource);
+        return $this->createStreamFromResource($handle);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function createStreamFromResource($resource): StreamInterface
+    public function createStreamFromResource($handle): StreamInterface
     {
-        if (!is_resource($resource)) {
+        if (!is_resource($handle)) {
             throw new InvalidArgumentException(
                 'Parameter 1 of StreamFactory::createStreamFromResource() must be a resource.'
             );
         }
 
-        return new Stream($resource);
+        return new Stream($handle);
     }
 }
