@@ -56,16 +56,15 @@ class ServerRequestFactory implements ServerRequestFactoryInterface
         }
 
         $body = $this->streamFactory->createStream();
-        $headers = (new Headers())->getHeaders();
+        $headers = new Headers();
 
         if (!empty($serverParams)) {
             if (function_exists('getallheaders')) {
-                $headers = getallheaders();
+                $headersData = getallheaders();
+                if (is_array($headersData) && count($headersData)) {
+                    $headers->setHeaders($headersData);
+                }
             }
-        }
-
-        if (!is_array($headers)) {
-            $headers = [];
         }
 
         return new Request($method, $uri, $headers, $serverParams, $body);
