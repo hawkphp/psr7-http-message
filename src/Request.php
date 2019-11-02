@@ -90,7 +90,7 @@ class Request extends Message implements ServerRequestInterface
         StreamInterface $body
     ) {
         $this->method = $this->filterMethod($method);
-        $this->uri = (is_string($uri)) ? new Uri($uri) : $uri;
+        $this->uri = $uri;
         $this->headers = $headers;
         $this->serverParams = $serverParams;
         $this->attributes = [];
@@ -290,8 +290,10 @@ class Request extends Message implements ServerRequestInterface
      */
     public function withParsedBody($data)
     {
-        if (!is_array($data) && !is_object($data) && !is_null($data)) {
-            throw new InvalidArgumentException('Parsed body value must be object, array or null');
+        if (!is_null($data) && !is_object($data) && !is_array($data)) {
+            throw new InvalidArgumentException(
+                'Parsed body parameter must be object, array or null'
+            );
         }
 
         $clone = clone $this;

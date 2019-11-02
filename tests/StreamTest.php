@@ -13,10 +13,10 @@ class StreamTest extends TestCase
 {
     public function createBody($mode)
     {
-        $body = fopen('php://temp', $mode);
-        fwrite($body, 'body');
+        $handle = fopen('php://temp', $mode);
+        fwrite($handle, 'body');
 
-        return $body;
+        return $handle;
     }
 
     public function testConstructor()
@@ -37,10 +37,10 @@ class StreamTest extends TestCase
 
     public function testStreamDestruct()
     {
-        $body = fopen('php://temp', 'r');
-        $stream = new Stream($body);
+        $handle = fopen('php://temp', 'r');
+        $stream = new Stream($handle);
         unset($stream);
-        $this->assertFalse(is_resource($body));
+        $this->assertFalse(is_resource($handle));
     }
 
     public function testToString()
@@ -70,10 +70,10 @@ class StreamTest extends TestCase
 
     public function testEnsuresRightSize()
     {
-        $body = fopen('php://temp', 'w+');
-        $this->assertEquals(4, fwrite($body, 'test'));
+        $handle = fopen('php://temp', 'w+');
+        $this->assertEquals(4, fwrite($handle, 'test'));
 
-        $stream = new Stream($body);
+        $stream = new Stream($handle);
         $this->assertEquals(4, $stream->getSize());
         $this->assertEquals(5, $stream->write('test2'));
         $this->assertEquals(9, $stream->getSize());
@@ -90,24 +90,24 @@ class StreamTest extends TestCase
 
     public function testStreamPosition()
     {
-        $body = fopen('php://temp', 'w+');
-        $stream = new Stream($body);
+        $handle = fopen('php://temp', 'w+');
+        $stream = new Stream($handle);
         $this->assertEquals(0, $stream->tell());
         $stream->write('test');
         $this->assertEquals(4, $stream->tell());
         $stream->seek(2);
         $this->assertEquals(2, $stream->tell());
-        $this->assertSame(ftell($body), $stream->tell());
+        $this->assertSame(ftell($handle), $stream->tell());
         $stream->close();
     }
 
     public function testDetachStream()
     {
-        $body = fopen('php://temp', 'w+');
-        $stream = new Stream($body);
+        $handle = fopen('php://temp', 'w+');
+        $stream = new Stream($handle);
         $stream->write('foo');
         $this->assertTrue($stream->isReadable());
-        $this->assertSame($body, $stream->detach());
+        $this->assertSame($handle, $stream->detach());
         $stream->detach();
 
         $this->assertSame('', (string)$stream);
