@@ -16,21 +16,9 @@ use RuntimeException;
 class Stream implements StreamInterface
 {
     /**
-     * The mode parameter specifies the type of access you require to the stream.
-     *
-     * @see https://www.php.net/manual/en/function.fopen.php
-     */
-    private const READABLE_MODES = '/r|a\+|ab\+|w\+|wb\+|x\+|xb\+|c\+|cb\+/';
-
-    /**
-     *
-     */
-    private const WRITABLE_MODES = '/a|w|r\+|rb\+|rw|x|c/';
-
-    /**
      * @var StreamInterface
      */
-    private $stream;
+    private $resource;
 
     /**
      * @var mixed
@@ -51,7 +39,6 @@ class Stream implements StreamInterface
      * @var bool
      */
     private $readable = false;
-
 
     /**
      * @var bool
@@ -79,11 +66,12 @@ class Stream implements StreamInterface
         }
 
         $this->meta = array_merge($metadata, stream_get_meta_data($stream));
+        $this->resource = $stream;
+        $mode = $this->meta['mode'];
 
-        $this->stream = $stream;
-        $this->seekable = $this->meta['seekable'];
-        $this->readable = (bool)preg_match(self::READABLE_MODES, $this->meta['mode']);
-        $this->writable = (bool)preg_match(self::WRITABLE_MODES, $this->meta['mode']);
+        $this->writable = (bool)preg_match('/a|w|r\+|rb\+|rw|x|c/', $mode);
+        $this->readable = (bool)preg_match('/r|a\+|ab\+|w\+|wb\+|x\+|xb\+|c\+|cb\+/', $mode);
+        $this->seekable = fseek($this->resource, 0, SEEK_CUR) === 0 && $this->meta['seekable'];
         $this->uri = $this->getMetadata('uri');
     }
 
@@ -108,9 +96,9 @@ class Stream implements StreamInterface
      */
     public function close()
     {
-        if (isset($this->stream)) {
-            if (is_resource($this->stream)) {
-                fclose($this->stream);
+        if (isset($this->resource)) {
+            if (is_resource($this->resource)) {
+                fclose($this->resource);
             }
             $this->detach();
         }
@@ -121,11 +109,11 @@ class Stream implements StreamInterface
      */
     public function detach()
     {
-        $resource = $this->stream;
-        $this->stream = null;
-        $this->readable = null;
-        $this->writable = null;
-        $this->seekable = null;
+        $resource = $this->resource;
+        $this->resource = false;
+        $this->readable = false;
+        $this->writable = false;
+        $this->seekable = false;
         $this->meta = null;
         $this->size = null;
         $this->uri = null;
@@ -138,8 +126,8 @@ class Stream implements StreamInterface
      */
     public function getSize(): ?int
     {
-        if ($this->stream && !$this->size) {
-            $stats = fstat($this->stream);
+        if ($this->resource && !$this->size) {
+            $stats = fstat($this->resource);
             $this->size = isset($stats['size']) ? $stats['size'] : null;
         }
 
@@ -151,7 +139,11 @@ class Stream implements StreamInterface
      */
     public function tell(): int
     {
-        $result = ftell($this->stream);
+        if (!is_resource($this->resource)) {
+            throw new RuntimeException('Failed to get contents of stream');
+        }
+
+        $result = ftell($this->resource);
 
         if ($result === false) {
             throw new RuntimeException('Unable to determine stream position');
@@ -165,7 +157,7 @@ class Stream implements StreamInterface
      */
     public function eof(): bool
     {
-        return $this->stream ? feof($this->stream) : true;
+        return $this->resource ? feof($this->resource) : true;
     }
 
     /**
@@ -173,7 +165,7 @@ class Stream implements StreamInterface
      */
     public function seek($offset, $whence = SEEK_SET): void
     {
-        if (!$this->isSeekable() || $this->stream && fseek($this->stream, $offset, $whence) === -1) {
+        if (!$this->isSeekable() || $this->resource && fseek($this->resource, $offset, $whence) === -1) {
             throw new RuntimeException('Could not seek in stream');
         }
     }
@@ -183,9 +175,17 @@ class Stream implements StreamInterface
      */
     public function rewind(): void
     {
-        if (!$this->isSeekable() || $this->stream && rewind($this->stream) === false) {
+        if (!$this->isSeekable() || $this->resource && rewind($this->resource) === false) {
             throw new RuntimeException('Could not rewind stream');
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isWritable()
+    {
+        return $this->writable;
     }
 
     /**
@@ -195,8 +195,8 @@ class Stream implements StreamInterface
     {
         $written = false;
 
-        if ($this->stream) {
-            $written = fwrite($this->stream, $string);
+        if ($this->resource) {
+            $written = fwrite($this->resource, $string);
         }
 
         if ($written === false) {
@@ -211,25 +211,17 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function isReadable()
-    {
-        return $this->readable;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isWritable()
-    {
-        return $this->writable;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function isSeekable()
     {
         return $this->seekable;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isReadable()
+    {
+        return $this->readable;
     }
 
     /**
@@ -239,8 +231,8 @@ class Stream implements StreamInterface
     {
         $data = false;
 
-        if ($this->stream) {
-            $data = fread($this->stream, $length);
+        if ($this->resource) {
+            $data = fread($this->resource, $length);
         }
 
         if (!is_string($data)) {
@@ -255,13 +247,13 @@ class Stream implements StreamInterface
      */
     public function getContents(): string
     {
-        $contents = '';
-
-        if (is_resource($this->stream)) {
-            $contents = stream_get_contents($this->stream);
+        if (!is_resource($this->resource)) {
+            throw new RuntimeException('Failed to get contents of stream');
         }
 
-        if (!$contents) {
+        $contents = stream_get_contents($this->resource);
+
+        if ($contents === false) {
             throw new RuntimeException('Failed to get contents of stream');
         }
 
@@ -273,18 +265,24 @@ class Stream implements StreamInterface
      */
     public function getMetadata($key = null)
     {
-        if (!isset($this->stream) || is_resource($this->stream)) {
-            return $key ? null : [];
+        if (!isset($this->resource)) {
+            return is_null($key) ? null : [];
         }
 
-        $this->meta = is_resource($this->stream)
-            ? stream_get_meta_data($this->stream)
-            : [];
+        $meta = stream_get_meta_data($this->resource);
 
-        if (is_null($key)) {
-            return $this->meta;
+        if (!$key) {
+            return $meta;
         }
 
-        return array_key_exists($key, $this->meta) ? $this->meta[$key] : null;
+        return isset($meta[$key]) ? $meta[$key] : null;
+    }
+
+    /**
+     *
+     */
+    public function __destruct()
+    {
+        $this->close();
     }
 }
