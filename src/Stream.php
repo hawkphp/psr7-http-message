@@ -16,7 +16,7 @@ use RuntimeException;
 class Stream implements StreamInterface
 {
     /**
-     * @var StreamInterface
+     * @var resource|null
      */
     private $resource;
 
@@ -51,22 +51,31 @@ class Stream implements StreamInterface
     private $uri;
 
     /**
-     * Stream constructor
-     * @param StreamInterface|null|resource $stream
-     * @param array $metadata
+     * Stream constructor.
+     * @param resource|null $resource
      */
-    public function __construct($stream, array $metadata = [])
+    public function __construct($resource = null)
     {
-        if (!is_resource($stream)) {
+        if ($resource === null) {
+            return;
+        }
+
+        $this->create($resource);
+    }
+
+    /**
+     * Create stream
+     *
+     * @param resource $resource
+     */
+    public function create($resource)
+    {
+        if (!is_resource($resource)) {
             throw new InvalidArgumentException('Stream must be a resource');
         }
 
-        if (isset($metadata['size'])) {
-            $this->size = $metadata['size'];
-        }
-
-        $this->meta = array_merge($metadata, stream_get_meta_data($stream));
-        $this->resource = $stream;
+        $this->meta = stream_get_meta_data($resource);
+        $this->resource = $resource;
         $mode = $this->meta['mode'];
 
         $this->writable = (bool)preg_match('/a|w|r\+|rb\+|rw|x|c/', $mode);
@@ -110,7 +119,7 @@ class Stream implements StreamInterface
     public function detach()
     {
         $resource = $this->resource;
-        $this->resource = false;
+        $this->resource = null;
         $this->readable = false;
         $this->writable = false;
         $this->seekable = false;
@@ -126,12 +135,17 @@ class Stream implements StreamInterface
      */
     public function getSize(): ?int
     {
-        if ($this->resource && !$this->size) {
-            $stats = fstat($this->resource);
-            $this->size = isset($stats['size']) ? $stats['size'] : null;
+        if (is_null($this->resource)) {
+            return null;
         }
 
-        return $this->size;
+        $stats = fstat($this->resource);
+
+        if ($stats !== false) {
+            return (int)$stats['size'];
+        }
+
+        return null;
     }
 
     /**
