@@ -23,7 +23,7 @@ class Response extends Message implements ResponseInterface
     /**
      * @var string
      */
-    private $reasonPhrase;
+    private $reasonPhrase = '';
 
     /**
      * Map of standard HTTP status code/reason phrases
@@ -142,12 +142,21 @@ class Response extends Message implements ResponseInterface
         return $clone;
     }
 
+
     /**
      * {@inheritdoc}
      */
     public function getReasonPhrase(): string
     {
-        return $this->reasonPhrase;
+        if ($this->reasonPhrase !== '') {
+            return $this->reasonPhrase;
+        }
+
+        if (isset($this->phrases[$this->statusCode])) {
+            return $this->phrases[$this->statusCode];
+        }
+
+        return '';
     }
 
     /**
