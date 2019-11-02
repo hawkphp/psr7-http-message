@@ -105,13 +105,13 @@ class Response extends Message implements ResponseInterface
      * Response constructor.
      * @param int $code
      * @param string $message
-     * @param array $headers
+     * @param Headers $headers
      * @param StreamInterface|null $body
      */
-    public function __construct(int $code = 200, $message = '', $headers = [], StreamInterface $body = null)
+    public function __construct(int $code = 200, $message = '', Headers $headers = null, StreamInterface $body = null)
     {
         $this->statusCode = $this->filterStatus($code);
-        $this->headers = $headers ? $headers : new Headers();
+        $this->headers = ($headers instanceof Headers) ? $headers : new Headers();
         $this->body = $body ? $body : (new StreamFactory())->createStream();
         $this->message = $message;
     }
@@ -129,15 +129,14 @@ class Response extends Message implements ResponseInterface
      */
     public function withStatus($code, $reasonPhrase = ''): self
     {
-        $code = $this->filterStatus($code);
+        $statusCode = $this->filterStatus($code);
 
-        $clone = clone $this;
-        $clone->statusCode = $code;
-
-        if ((null === $reasonPhrase || '' === $reasonPhrase) && isset($this->phrases[$clone->statusCode])) {
-            $reasonPhrase = $this->phrases[$clone->statusCode];
+        if (!is_string($reasonPhrase)) {
+            throw new InvalidArgumentException('Response reason phrase must be a string.');
         }
 
+        $clone = clone $this;
+        $clone->statusCode = $statusCode;
         $clone->reasonPhrase = $reasonPhrase;
 
         return $clone;
@@ -153,18 +152,13 @@ class Response extends Message implements ResponseInterface
 
     /**
      * Filter HTTP status code
-     * @param $code
+     *
+     * @param integer $code
      * @return int
      */
     protected function filterStatus($code): int
     {
-        if (!is_int($code) && !is_string($code)) {
-            throw new InvalidArgumentException('Status code must be an integer value');
-        }
-
-        $code = (int)$code;
-
-        if ($code < 100 || $code > 599) {
+        if (!is_integer($code) || ($code < 100 || $code > 599)) {
             throw new InvalidArgumentException('Status code must be an integer value between 100 and 599');
         }
 
