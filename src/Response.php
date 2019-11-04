@@ -105,11 +105,15 @@ class Response extends Message implements ResponseInterface
      * Response constructor.
      * @param int $code
      * @param string $message
-     * @param Headers $headers
+     * @param Headers|array $headers
      * @param StreamInterface|null $body
      */
-    public function __construct(int $code = 200, $message = '', Headers $headers = null, StreamInterface $body = null)
+    public function __construct(int $code = 200, $message = '', $headers = null, StreamInterface $body = null)
     {
+        if (is_array($headers)) {
+            $headers = new Headers($headers);
+        }
+
         $this->statusCode = $this->filterStatus($code);
         $this->headers = ($headers instanceof Headers) ? $headers : new Headers();
         $this->body = $body ? $body : (new StreamFactory())->createStream();
