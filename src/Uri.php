@@ -13,6 +13,7 @@ use Psr\Http\Message\UriInterface;
  */
 class Uri implements UriInterface
 {
+    private const FILTER_PATTERN_USER_INFO = '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=]+|%(?![A-Fa-f0-9]{2}))/u';
     private const FILTER_PATTERN = '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/';
 
     /**
@@ -327,7 +328,7 @@ class Uri implements UriInterface
             return '';
         }
 
-        $match = $this->pregReplace('/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=]+|%(?![A-Fa-f0-9]{2}))/u', $info);
+        $match = $this->pregReplace(self::FILTER_PATTERN_USER_INFO, $info);
 
         return is_string($match) ? $match : '';
     }
