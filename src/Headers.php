@@ -83,7 +83,6 @@ class Headers
         }
 
         $header = $this->headerNames[$normalized];
-
         unset($this->headers[$header], $this->headerNames[$normalized]);
 
         return $this;
@@ -114,10 +113,9 @@ class Headers
     public function setHeader(string $name, $value): self
     {
         $value = $this->validateAndTrimHeader($name, $value);
-
         $normalized = strtolower($name);
 
-        if (isset($this->headerNames[$normalized])) {
+        if ($this->hasHeader($normalized)) {
             unset($this->headers[$this->headerNames[$normalized]]);
         }
 
@@ -133,7 +131,7 @@ class Headers
      */
     public function hasHeader(string $name): bool
     {
-        return isset($this->headerNames[strtolower($name)]);
+        return array_key_exists(strtolower($name), $this->headerNames);
     }
 
     /**
@@ -152,9 +150,7 @@ class Headers
     private function validateAndTrimHeader(string $name, $values): array
     {
         $headerValues = [];
-
         $this->validateHeaderName($name);
-
         $values = (is_array($values)) ? $values : [$values];
 
         foreach ($values as $value) {
