@@ -106,17 +106,23 @@ class Response extends Message implements ResponseInterface
      * @param int $code
      * @param string $message
      * @param Headers|array $headers
-     * @param StreamInterface|null $body
+     * @param StreamInterface|null|string $body
+     * @param string $version
      */
-    public function __construct(int $code = 200, $message = '', $headers = null, StreamInterface $body = null)
+    public function __construct(int $code = 200, $message = '', $headers = null, $body = null, $version = '1.1')
     {
         if (is_array($headers)) {
             $headers = new Headers($headers);
         }
 
+        if (is_string($body)) {
+            $body = (new StreamFactory())->createStream($body);
+        }
+
+        $this->protocol = $version;
         $this->statusCode = $this->filterStatus($code);
         $this->headers = ($headers instanceof Headers) ? $headers : new Headers();
-        $this->body = $body ? $body : (new StreamFactory())->createStream();
+        $this->body = ($body instanceof StreamInterface) ? $body : (new StreamFactory())->createStream();
         $this->message = $message;
     }
 
@@ -145,7 +151,6 @@ class Response extends Message implements ResponseInterface
 
         return $clone;
     }
-
 
     /**
      * {@inheritdoc}
