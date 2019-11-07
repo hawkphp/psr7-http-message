@@ -13,7 +13,6 @@ use Psr\Http\Message\StreamInterface;
  */
 class ResponseTest extends TestCase
 {
-
     public function testDefaultProperties()
     {
         $response = new Response();
