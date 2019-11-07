@@ -116,6 +116,15 @@ class ResponseTest extends TestCase
 
     public function testWithProtocolVersion()
     {
+        $response = (new Response())->withProtocolVersion('1.1');
+        $this->assertSame('1.1', $response->getProtocolVersion());
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testInvalidWithProtocolVersion()
+    {
         $response = (new Response())->withProtocolVersion('4.1');
         $this->assertSame('4.1', $response->getProtocolVersion());
     }
@@ -127,72 +136,64 @@ class ResponseTest extends TestCase
         $this->assertSame('test', (string)$response->getBody());
     }
 
-    public function testSameInstance()
-    {
-        $response = new Response();
-        $this->assertSame($response, $response->withBody($response->getBody()));
-    }
-
     public function testWithHeader()
     {
-        $response = new Response(200, ['Accept' => ['application/xml']]);
+        $response = new Response(200, '', ['Accept' => ['application/xml']]);
         $response2 = $response->withHeader('Accept', 'application/json');
         $this->assertSame(['Accept' => ['application/xml']], $response->getHeaders());
         $this->assertSame(['Accept' => ['application/json']], $response2->getHeaders());
-        $this->assertSame('application/xml', $response2->getHeaderLine('Accept'));
-        $this->assertSame('application/json', $response2->getHeader('Accept'));
+        $this->assertSame('application/xml', $response->getHeaderLine('Accept'));
+        $this->assertSame(['application/json'], $response2->getHeader('Accept'));
     }
 
     public function testWithHeaderArray()
     {
-        $response = new Response(200, ['Accept' => ['application/xml']]);
+        $response = new Response(200, '', ['Accept' => ['application/xml']]);
         $response2 = $response->withHeader('Content-Language', ['ru', 'en']);
+
         $this->assertSame(['Accept' => ['application/xml']], $response->getHeaders());
         $this->assertSame(
             ['Accept' => ['application/xml'], 'Content-Language' => ['ru', 'en']],
             $response2->getHeaders()
         );
-        $this->assertSame('ru, en', $response2->getHeaderLine('Content-Language'));
+        $this->assertSame('ru,en', $response2->getHeaderLine('Content-Language'));
         $this->assertSame(['ru', 'en'], $response2->getHeader('Content-Language'));
     }
 
     public function testWithAddedHeader()
     {
-        $response = new Response(200, ['Accept' => ['application/xml']]);
+        $response = new Response(200, '', ['Accept' => ['application/xml']]);
         $response2 = $response->withAddedHeader('Accept', 'application/json');
         $this->assertSame(['Accept' => ['application/xml']], $response->getHeaders());
         $this->assertSame(['Accept' => ['application/xml', 'application/json']], $response2->getHeaders());
-        $this->assertSame('application/xml, application/json', $response2->getHeaderLine('Accept'));
+        $this->assertSame('application/xml,application/json', $response2->getHeaderLine('Accept'));
         $this->assertSame(['application/xml', 'application/json'], $response2->getHeader('Accept'));
     }
 
     public function testWithAddedHeaderArray()
     {
-        $response = new Response(200, ['Accept' => ['application/xml']]);
+        $response = new Response(200, '', ['Accept' => ['application/xml']]);
         $response2 = $response->withAddedHeader('Accept', ['application/json']);
         $this->assertSame(['Accept' => ['application/xml']], $response->getHeaders());
         $this->assertSame(['Accept' => ['application/xml', 'application/json']], $response2->getHeaders());
-        $this->assertSame('application/xml, application/json', $response2->getHeaderLine('Accept'));
+        $this->assertSame('application/xml,application/json', $response2->getHeaderLine('Accept'));
         $this->assertSame(['application/xml', 'application/json'], $response2->getHeader('Accept'));
     }
 
     public function testWithoutHeaderThatExists()
     {
-        $response = new Response(200, ['Accept' => 'application/xml', 'Age' => '1']);
+        $response = new Response(200, '', ['Accept' => 'application/xml', 'Age' => '1']);
         $response2 = $response->withoutHeader('Age');
-
+        $this->assertFalse($response2->hasHeader('Age'));
         $this->assertTrue($response->hasHeader('Accept'));
-        $this->assertSame(['Accept' => 'application/xml', 'Age' => '1'], $response->getHeaders());
-        $this->assertFalse($response2->hasHeader('Accept'));
-        $this->assertSame(['Age' => ['1']], $response2->getHeaders());
+        $this->assertSame(['Accept' => ['application/xml'], 'Age' => ['1']], $response->getHeaders());
+        $this->assertSame(['Accept' => ['application/xml']], $response2->getHeaders());
     }
 
     public function testWithoutHeaderThatDoesNotExist()
     {
-        $response = new Response(200, ['Accept' => 'application/xml']);
+        $response = new Response(200, '', ['Accept' => 'application/xml']);
         $response2 = $response->withoutHeader('accept');
-        $this->assertSame($response, $response2);
         $this->assertFalse($response2->hasHeader('Accept'));
-        $this->assertSame(['Accept' => 'application/xml'], $response2->getHeaders());
     }
 }
