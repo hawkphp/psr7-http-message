@@ -110,6 +110,7 @@ abstract class Message implements MessageInterface
     public function withHeader($name, $value)
     {
         $clone = clone $this;
+        $clone->headers = clone $this->headers;
         $clone->headers->setHeader($name, $value);
 
         return $clone;
@@ -121,6 +122,7 @@ abstract class Message implements MessageInterface
     public function withAddedHeader($name, $value)
     {
         $clone = clone $this;
+        $clone->headers = clone $this->headers;
         $clone->headers->addHeader($name, $value);
 
         return $clone;
@@ -132,6 +134,7 @@ abstract class Message implements MessageInterface
     public function withoutHeader($name)
     {
         $clone = clone $this;
+        $clone->headers = clone $this->headers;
         $clone->headers->removeHeader($name);
 
         return $clone;
