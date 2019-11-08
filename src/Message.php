@@ -28,7 +28,6 @@ abstract class Message implements MessageInterface
         '1.1',
         '2.0',
         '2',
-        '3.0'
     ];
 
     /**
@@ -67,6 +66,7 @@ abstract class Message implements MessageInterface
         }
 
         $clone = clone $this;
+        $clone->headers = clone $this->headers;
         $clone->protocol = $version;
 
         return $clone;
@@ -154,6 +154,7 @@ abstract class Message implements MessageInterface
     public function withBody(StreamInterface $body)
     {
         $clone = clone $this;
+        $clone->headers = clone $this->headers;
         $clone->body = $body;
 
         return $clone;
