@@ -76,29 +76,29 @@ class Request extends Message implements ServerRequestInterface
 
     /**
      * Request constructor.
-     * @param string $method
-     * @param UriInterface $uri
-     * @param Headers $headers
-     * @param array $serverParams
-     * @param StreamInterface $body
+     * @param string|null $method
+     * @param string|UriInterface $uri
+     * @param null|array|Headers $headers
+     * @param null|StreamInterface $body
      */
     public function __construct(
-        $method,
-        $uri,
-        $headers,
-        array $serverParams,
-        StreamInterface $body
+        $uri = '',
+        $method = "GET",
+        $headers = null,
+        $body = null
     ) {
-        $this->method = $this->filterMethod($method);
-        $this->uri = $uri;
-        $this->headers = $headers;
-        $this->serverParams = $serverParams;
-        $this->attributes = [];
-        $this->body = $body;
-
-        if (isset($serverParams['SERVER_PROTOCOL'])) {
-            $this->protocol = str_replace('HTTP/', '', $serverParams['SERVER_PROTOCOL']);
+        if (is_array($headers)) {
+            $headers = new Headers($headers);
         }
+
+        if ($body instanceof Stream) {
+            $this->body = $body;
+        }
+
+        $this->attributes = [];
+        $this->uri = (is_string($uri) && $uri !== '') ? new Uri($uri) : new Uri();
+        $this->headers = ($headers instanceof Headers) ? $headers : new Headers();
+        $this->method = $this->filterMethod($method);
 
         if (!$this->headers->hasHeader('Host') || $this->uri->getHost() !== '') {
             $this->headers->setHeader('Host', $this->uri->getHost());
@@ -210,7 +210,6 @@ class Request extends Message implements ServerRequestInterface
 
         return $clone;
     }
-
 
     /**
      * {@inheritdoc}
