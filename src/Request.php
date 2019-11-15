@@ -2,6 +2,7 @@
 
 namespace Hawk\Psr7;
 
+use Hawk\Psr7\Factory\StreamFactory;
 use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
@@ -81,21 +82,18 @@ class Request extends Message implements ServerRequestInterface
      * @param null|array|Headers $headers
      * @param null|StreamInterface $body
      */
-    public function __construct(
-        $uri = '',
-        $method = "GET",
-        $headers = null,
-        $body = null
-    ) {
+    public function __construct($uri = '', $method = "GET", $headers = null, $body = null)
+    {
         if (is_array($headers)) {
             $headers = new Headers($headers);
         }
 
-        if ($body instanceof Stream) {
-            $this->body = $body;
+        if (is_string($body) && $body !== '') {
+            $body = (new StreamFactory())->createStream($body);
         }
 
         $this->attributes = [];
+        $this->body = ($body instanceof Stream) ? $body :  (new StreamFactory())->createStream('');
         $this->uri = (is_string($uri) && $uri !== '') ? new Uri($uri) : new Uri();
         $this->headers = ($headers instanceof Headers) ? $headers : new Headers();
         $this->method = $this->filterMethod($method);
