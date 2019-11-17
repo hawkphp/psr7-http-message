@@ -3,6 +3,7 @@
 namespace Hawk\Tests\Psr7;
 
 use Hawk\Psr7\Request;
+use Hawk\Psr7\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
 
@@ -27,31 +28,39 @@ class RequestTest extends TestCase
 
     public function testConstructWithBody()
     {
-        $r = new Request('/', 'GET', [], 'test');
-        $this->assertInstanceOf(StreamInterface::class, $r->getBody());
-        $this->assertEquals('test', (string)$r->getBody());
+        $request = new Request('/', 'GET', [], 'test');
+        $this->assertInstanceOf(StreamInterface::class, $request->getBody());
+        $this->assertEquals('test', (string)$request->getBody());
     }
 
     public function testNullBody()
     {
-        $r = new Request('/', 'GET', [], null);
-        $this->assertInstanceOf(StreamInterface::class, $r->getBody());
-        $this->assertSame('', (string)$r->getBody());
+        $request = new Request('/', 'GET', [], null);
+        $this->assertInstanceOf(StreamInterface::class, $request->getBody());
+        $this->assertSame('', (string)$request->getBody());
     }
 
-    public function testFalseyBody()
+    public function testGetBody()
     {
-        $r = new Request('GET', '/', [], '0');
-        $this->assertInstanceOf(StreamInterface::class, $r->getBody());
-        $this->assertSame('0', (string)$r->getBody());
+        $request = new Request('/', 'GET', [], 'test');
+        $this->assertInstanceOf(StreamInterface::class, $request->getBody());
+        $this->assertSame('test', (string)$request->getBody());
     }
 
-    public function testConstructorDoesNotReadStreamBody()
+    public function testWithUri()
     {
-        $body = $this->getMockBuilder(StreamInterface::class)->getMock();
-        $body->expects($this->never())
-            ->method('__toString');
-        $r = new Request('GET', '/', [], $body);
-        $this->assertSame($body, $r->getBody());
+        $request = new Request('/');
+        $uri = $request->getUri();
+        $this->assertSame($uri, $request->getUri());
+
+        $uri2 = new Uri('http://example.com');
+        $request2 = $request->withUri($uri2);
+        $this->assertNotSame($request, $request2);
+        $this->assertSame($uri2, $request2->getUri());
+        $this->assertSame($uri, $request->getUri());
+
+        $request1 = new Request('http://example.com', 'GET');
+        $request2 = $request1->withUri($request1->getUri());
+        $this->assertSame($request1, $request2);
     }
 }
