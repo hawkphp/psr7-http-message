@@ -58,9 +58,51 @@ class RequestTest extends TestCase
         $this->assertNotSame($request, $request2);
         $this->assertSame($uri2, $request2->getUri());
         $this->assertSame($uri, $request->getUri());
+    }
 
-        $request1 = new Request('http://example.com', 'GET');
-        $request2 = $request1->withUri($request1->getUri());
-        $this->assertSame($request1, $request2);
+    public function testWithRequestTarget()
+    {
+        $request1 = new Request('/');
+        $request2 = $request1->withRequestTarget('?');
+        $this->assertEquals('?', $request2->getRequestTarget());
+        $this->assertEquals('/', $request1->getRequestTarget());
+    }
+
+    public function testGetRequestTarget()
+    {
+        $request = new Request('http://example.com');
+        $this->assertEquals('/', $request->getRequestTarget());
+
+        $request = new Request('http://example.com/test?foo=bar');
+        $this->assertEquals('/test?foo=bar', $request->getRequestTarget());
+
+        $request = new Request('http://example.com?foo=bar');
+        $this->assertEquals('/?foo=bar', $request->getRequestTarget());
+
+        // request target does not allow spaces
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid request target provided; cannot contain whitespace');
+
+        $request = new Request('/');
+        $request->withRequestTarget('/test foo bar');
+
+        $request = new Request();
+        $this->assertEquals('/', $request->getRequestTarget());
+
+        $request = new Request('http://example.com/test foo/');
+        $this->assertEquals('/test%20foo/', $request->getRequestTarget());
+
+        $r1 = new Request('http://example.com/test?foo=bar');
+        $this->assertEquals('/test?foo=bar', $r1->getRequestTarget());
+
+
+        $r1 = new Request('http://example.com/test?xyz', 'GET');
+        $this->assertEquals('/test?xyz', $r1->getRequestTarget());
+    }
+
+    public function testHostIsAddedFirst()
+    {
+        $request = new Request('http://example.com/test?foo=bar', 'GET', ['Foo' => 'Bar']);
+        $this->assertEquals(['Host' => ['example.com'], 'Foo' => ['Bar']], $request->getHeaders());
     }
 }
