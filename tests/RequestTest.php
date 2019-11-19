@@ -105,4 +105,59 @@ class RequestTest extends TestCase
         $request = new Request('http://example.com/test?foo=bar', 'GET', ['Foo' => 'Bar']);
         $this->assertEquals(['Host' => ['example.com'], 'Foo' => ['Bar']], $request->getHeaders());
     }
+
+    public function testGetHeaderLine()
+    {
+        $request = new Request('http://example.com/test?foo=bar', 'GET', ['Test' => ['Foo', 'Bar']]);
+        $this->assertEquals('Foo,Bar', $request->getHeaderLine('Test'));
+
+        $request2 = $request->withUri(new Uri('http://example.com/test'));
+        $this->assertEquals('example.com', $request2->getHeaderLine('Host'));
+
+        $request = new Request('', 'GET', ['Content-Length' => 200]);
+        $this->assertSame(['200'], $request->getHeader('Content-Length'));
+        $this->assertSame('200', $request->getHeaderLine('Content-Length'));
+    }
+
+    public function testHeaderWithEmptyName()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Header name must be an RFC 7230 compatible string');
+        $request = new Request('https://example.com/');
+        $request->withHeader('', 'test');
+    }
+
+    public function testPortToHeader()
+    {
+        $request = new Request('http://example.com:80/test');
+        $this->assertEquals('example.com', $request->getHeaderLine('host'));
+    }
+
+
+    public function testHeaderWithEmptyValue()
+    {
+        $r = new Request('https://example.com');
+        $r = $r->withHeader('Accept', '');
+        $this->assertEquals([''], $r->getHeader('Accept'));
+    }
+
+    public function testUpdateHeaderHost()
+    {
+        $request = new Request('/');
+        $request = $request->withUri(new Uri('https://example.com/'));
+        $this->assertEquals('example.com', $request->getHeaderLine('Host'));
+
+        $request = new Request('https://example.com/');
+        $this->assertEquals('example.com', $request->getHeaderLine('Host'));
+        $request = $request->withUri(new Uri('https://example.com'));
+        $this->assertEquals('example.com', $request->getHeaderLine('Host'));
+
+        $request = new Request('/', 'GET');
+        $request = $request->withUri(new Uri('https://example.com:80/test'));
+        $this->assertEquals('example.com', $request->getHeaderLine('Host'));
+
+        $request = new Request('/');
+        $request = $request->withUri(new Uri('https://example.com:81'));
+        $this->assertEquals('example.com', $request->getHeaderLine('Host'));
+    }
 }
