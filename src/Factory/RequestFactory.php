@@ -2,7 +2,6 @@
 
 namespace Hawk\Psr7\Factory;
 
-use Hawk\Psr7\Headers;
 use Hawk\Psr7\Request;
 use InvalidArgumentException;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -51,6 +50,6 @@ class RequestFactory implements RequestFactoryInterface
             throw new InvalidArgumentException('$uri must be a string or has state UriInterface');
         }
 
-        return new Request($method, $uri, new Headers(), [], $this->streamFactory->createStream());
+        return new Request($uri, $method, []);
     }
 }
