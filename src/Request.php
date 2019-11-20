@@ -80,7 +80,7 @@ class Request extends Message implements ServerRequestInterface
      * @param string|null $method
      * @param string|UriInterface $uri
      * @param null|array|Headers $headers
-     * @param null|StreamInterface $body
+     * @param null|string|StreamInterface $body
      */
     public function __construct($uri = '', $method = "GET", $headers = null, $body = null)
     {
@@ -93,7 +93,7 @@ class Request extends Message implements ServerRequestInterface
         }
 
         $this->attributes = [];
-        $this->body = ($body instanceof Stream) ? $body :  (new StreamFactory())->createStream('');
+        $this->body = ($body instanceof Stream) ? $body : (new StreamFactory())->createStream('');
         $this->uri = (is_string($uri) && $uri !== '') ? new Uri($uri) : new Uri();
         $this->headers = ($headers instanceof Headers) ? $headers : new Headers();
         $this->method = $this->filterMethod($method);
@@ -162,16 +162,16 @@ class Request extends Message implements ServerRequestInterface
     }
 
     /**
-     * @param string $method
+     * @param string|null $method
      * @return string
      */
     protected function filterMethod($method)
     {
-        $method = strtoupper($method);
-
         if (!is_string($method) || $method === '') {
             throw new \InvalidArgumentException('Method must be a non-empty string.');
         }
+
+        $method = strtoupper($method);
 
         if (!in_array($method, $this->validMethods, true)) {
             throw new InvalidArgumentException(sprintf('Unsupported HTTP method "%s" provided', $method));
