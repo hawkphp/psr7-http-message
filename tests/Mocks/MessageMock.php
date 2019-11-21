@@ -26,4 +26,12 @@ class MessageMock extends Message
      * @var string
      */
     public $protocolVersion;
+
+    /**
+     * MessageMock constructor.
+     */
+    public function __construct()
+    {
+        $this->headers = new Headers();
+    }
 }
