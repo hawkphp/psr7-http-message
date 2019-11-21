@@ -2,43 +2,61 @@
 
 namespace Hawk\Tests\Psr7;
 
+use Hawk\Psr7\Stream;
 use Hawk\Tests\Psr7\Mocks\MessageMock;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\MessageInterface;
-use Psr\Http\Message\StreamInterface;
 
 /**
  * Class MessageTest
  * @package Hawk\Tests\Psr7
  */
-class MessageTest extends TestCase implements MessageInterface
+class MessageTest extends TestCase
 {
-    public function getProtocolVersion()
+    public function testDefaultProtocolVersion()
     {
         $message = new MessageMock();
-
-        $this->assertSame("1.0", $message->protocolVersion);
-
-        $message->protocolVersion = "1.0";
-        $this->assertSame("1.0", $message->protocolVersion);
+        $this->assertEquals('1.1', $message->getProtocolVersion());
     }
 
-    public function withProtocolVersion($version)
+    public function testWithProtocolVersion()
     {
-        // TODO: Implement withProtocolVersion() method.
+        $message = new MessageMock();
+        $clone = $message->withProtocolVersion('1.0');
+        $this->assertEquals('1.0', $clone->getProtocolVersion());
     }
 
-    public function getHeaders()
+    public function testGetProtocolVersion()
     {
-        // TODO: Implement getHeaders() method.
+        $message = new MessageMock();
+        $this->assertEquals("1.1", $message->getProtocolVersion());
     }
 
-
-    public function hasHeader($name)
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testInvalidWithProtocolVersion()
     {
-        // TODO: Implement hasHeader() method.
+        $message = new MessageMock();
+        $message->withProtocolVersion('2.2');
     }
 
+    public function testGetHeaders()
+    {
+        $message = new MessageMock();
+        $message->headers->addHeader('Foo', 'Bar');
+        $message->headers->addHeader('Foo', 'Baz');
+        $message->headers->addHeader('Foo', 'Xyz');
+        $this->assertEquals(['Foo' => ['Bar', 'Baz', 'Xyz']], $message->getHeaders());
+    }
+
+    public function testHasHeader()
+    {
+        $message = new MessageMock();
+        $message->headers->addHeader('Foo', 'Bar');
+        $this->assertTrue($message->hasHeader('Foo'));
+        $this->assertFalse($message->hasHeader('Bar'));
+    }
 
     public function getHeader($name)
     {
@@ -46,37 +64,76 @@ class MessageTest extends TestCase implements MessageInterface
     }
 
 
-    public function getHeaderLine($name)
+    public function testGetHeaderLine()
     {
-        // TODO: Implement getHeaderLine() method.
+        $message = new MessageMock();
+        $message->headers->addHeader('Foo', 'Bar');
+        $message->headers->addHeader('Foo', 'Baz');
+        $message->headers->addHeader('Foo', 'Xyz');
+
+        $this->assertEquals('Bar,Baz,Xyz', $message->getHeaderLine('Foo'));
+        $this->assertEquals('', $message->getHeaderLine('Bar'));
     }
 
-
-    public function withHeader($name, $value)
+    public function testGetHeader()
     {
-        // TODO: Implement withHeader() method.
+        $message = new MessageMock();
+        $message->headers->addHeader('Foo', 'Bar');
+        $message->headers->addHeader('Foo', 'Baz');
+        $message->headers->addHeader('Foo', 'Xyz');
+
+        $this->assertEquals(['Bar', 'Baz', 'Xyz'], $message->getHeader('Foo'));
+        $this->assertEquals([], $message->getHeader('Bar'));
     }
 
-
-    public function withAddedHeader($name, $value)
+    public function testWithHeader()
     {
-        // TODO: Implement withAddedHeader() method.
+        $message = new MessageMock();
+        $message->headers->addHeader('Foo', 'Bar');
+
+        $clone = $message->withHeader('Foo', 'Xyz');
+        $this->assertEquals('Xyz', $clone->getHeaderLine('Foo'));
     }
 
-    public function withoutHeader($name)
+    public function testWithAddedHeader()
     {
-        // TODO: Implement withoutHeader() method.
+        $message = new MessageMock();
+        $message->headers->addHeader('Foo', 'Bar');
+        $clone = $message->withAddedHeader('Foo', 'Xyz');
+        $this->assertEquals('Bar,Xyz', $clone->getHeaderLine('Foo'));
     }
 
-
-    public function getBody()
+    public function testWithoutHeader()
     {
-        // TODO: Implement getBody() method.
+        $message = new MessageMock();
+        $message->headers->addHeader('Foo', 'Bar');
+        $message->headers->addHeader('Baz', 'Xyz');
+        $clone = $message->withoutHeader('Baz');
+        $this->assertEquals(['Foo' => ['Bar']], $clone->getHeaders());
     }
 
-
-    public function withBody(StreamInterface $body)
+    public function testGetBody()
     {
-        // TODO: Implement withBody() method.
+        $body = $this->getMockBuilder(Stream::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $message = new MessageMock();
+        $message->body = $body;
+        $this->assertSame($body, $message->getBody());
+    }
+
+    public function testWithBody()
+    {
+        $body = $this->getMockBuilder(Stream::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $body2 = clone $body;
+        $message = new MessageMock();
+        $message->body = $body;
+        $clone = $message->withBody($body2);
+        $this->assertSame($body, $message->body);
+        $this->assertSame($body2, $clone->body);
     }
 }
