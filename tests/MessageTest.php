@@ -58,12 +58,6 @@ class MessageTest extends TestCase
         $this->assertFalse($message->hasHeader('Bar'));
     }
 
-    public function getHeader($name)
-    {
-        // TODO: Implement getHeader() method.
-    }
-
-
     public function testGetHeaderLine()
     {
         $message = new MessageMock();
