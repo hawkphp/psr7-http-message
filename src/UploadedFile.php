@@ -16,26 +16,15 @@ use Psr\Http\Message\UploadedFileInterface;
  */
 class UploadedFile implements UploadedFileInterface
 {
-
     /**
      * @var StreamInterface
      */
     private $stream;
 
     /**
-     * @var string|null
-     */
-    private $name;
-
-    /**
      * @var string
      */
     private $file;
-
-    /**
-     * @var string|null
-     */
-    private $type;
 
     /**
      * @var int|null
@@ -55,31 +44,59 @@ class UploadedFile implements UploadedFileInterface
     /**
      * @var bool
      */
-    private $sapi = false;
+    private $needIsMove = false;
+
+    /**
+     * @var
+     */
+    private $clientFilename;
+
+    /**
+     * @var
+     */
+    private $clientMediaType;
 
     /**
      * UploadedFile constructor.
-     * @param string $file
-     * @param string|null $name
-     * @param string|null $type
+     * @param StreamInterface $stream
      * @param int|null $size
      * @param int $error
-     * @param bool $sapi
+     * @param string|null $clientFilename
+     * @param string|null $clientMediaType
      */
     public function __construct(
-        string $file,
-        ?string $name = null,
-        ?string $type = null,
-        ?int $size = null,
-        int $error = UPLOAD_ERR_OK,
-        bool $sapi = false
+        StreamInterface $stream,
+        int $size = null,
+        int $error = \UPLOAD_ERR_OK,
+        string $clientFilename = null,
+        string $clientMediaType = null
     ) {
-        $this->file = $file;
-        $this->name = $name;
-        $this->type = $type;
-        $this->size = $size;
         $this->error = $error;
-        $this->sapi = $sapi;
+        $this->clientFilename = $clientFilename;
+        $this->clientMediaType = $clientMediaType;
+
+        if (!is_string($clientMediaType) && $clientMediaType !== null) {
+            throw new \InvalidArgumentException('Upload file client media type must be a string or null');
+        }
+
+        if (!is_string($clientFilename) && $clientFilename !== null) {
+            throw new \InvalidArgumentException('Upload file client filename must be a string or null');
+        }
+
+        if ($stream instanceof StreamInterface) {
+            $file = $stream->getMetadata('uri');
+            if (!is_string($file)) {
+                throw new \InvalidArgumentException('The path associated with the stream was not found');
+            }
+            $this->file = $file;
+            $this->stream = $stream;
+        } elseif (is_string($stream)) {
+            $this->file = $stream;
+        } else {
+            throw new \InvalidArgumentException('Specify the path to the file');
+        }
+
+        $this->size = $size;
     }
 
     /**
@@ -105,7 +122,7 @@ class UploadedFile implements UploadedFileInterface
     {
         if ($this->isMoved()) {
             throw new \RuntimeException(
-                sprintf('Unable to get stream, file %s has already been moved', $this->name)
+                sprintf('Unable to get stream, file %s has already been moved', $this->clientFilename)
             );
         }
 
@@ -146,7 +163,7 @@ class UploadedFile implements UploadedFileInterface
 
         if ($isUrlStream) {
             $this->copyStream($targetPath);
-        } elseif ($this->sapi !== false) {
+        } elseif ($this->needIsMove !== false) {
             $this->moveFile($targetPath);
         } else {
             $this->renameFile($targetPath);
@@ -160,7 +177,7 @@ class UploadedFile implements UploadedFileInterface
     {
         if (!rename($this->file, $targetPath)) {
             throw new \RuntimeException(
-                sprintf('Error moving uploaded file %s to %s', $this->name, $targetPath)
+                sprintf('Error moving uploaded file %s to %s', $this->clientFilename, $targetPath)
             );
         }
     }
@@ -172,13 +189,13 @@ class UploadedFile implements UploadedFileInterface
     {
         if (!copy($this->file, $targetPath)) {
             throw new \RuntimeException(
-                sprintf('Error moving uploaded file %s to %s', $this->name, $targetPath)
+                sprintf('Error moving uploaded file %s to %s', $this->clientFilename, $targetPath)
             );
         }
 
         if (!unlink($this->file)) {
             throw new \RuntimeException(
-                sprintf('Error removing uploaded file %s', $this->name)
+                sprintf('Error removing uploaded file %s', $this->clientFilename)
             );
         }
     }
@@ -196,7 +213,7 @@ class UploadedFile implements UploadedFileInterface
 
         if (!move_uploaded_file($this->file, $targetPath)) {
             throw new \RuntimeException(
-                sprintf('Error moving uploaded file %s to %s', $this->name, $targetPath)
+                sprintf('Error moving uploaded file %s to %s', $this->clientFilename, $targetPath)
             );
         }
     }
@@ -206,7 +223,7 @@ class UploadedFile implements UploadedFileInterface
      */
     public function getClientFilename(): ?string
     {
-        return $this->name;
+        return $this->clientFilename;
     }
 
     /**
@@ -214,7 +231,7 @@ class UploadedFile implements UploadedFileInterface
      */
     public function getClientMediaType(): ?string
     {
-        return $this->type;
+        return $this->clientMediaType;
     }
 
     /**
