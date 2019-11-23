@@ -13,8 +13,8 @@ class ResponseFactory implements ResponseFactoryInterface
     /**
      * {@inheritDoc}
      */
-    public function createResponse(int $code = 200, string $message = ''): ResponseInterface
+    public function createResponse(int $code = 200, string $reasonPhrase = ''): ResponseInterface
     {
-        return new Response($code, $message);
+        return new Response((int)$code, $reasonPhrase);
     }
 }
