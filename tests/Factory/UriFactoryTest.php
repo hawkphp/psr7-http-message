@@ -28,7 +28,7 @@ class UriFactoryTest extends UriFactoryTestCase
     public function testAuthorityPassword()
     {
         $uri = $this->factory->createUri('https://user:pass@example.com/foo');
-        $this->assertEquals('pass@example.com', $uri->getAuthority());
+        $this->assertEquals('user:pass@example.com', $uri->getAuthority());
     }
 
     public function testAuthorityHostAndPort()
