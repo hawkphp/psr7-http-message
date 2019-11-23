@@ -92,9 +92,13 @@ class Request extends Message implements ServerRequestInterface
             $body = (new StreamFactory())->createStream($body);
         }
 
+        if ((is_string($uri) && $uri !== '')) {
+            $uri = new Uri($uri);
+        }
+
         $this->attributes = [];
         $this->body = ($body instanceof Stream) ? $body : (new StreamFactory())->createStream('');
-        $this->uri = (is_string($uri) && $uri !== '') ? new Uri($uri) : new Uri();
+        $this->uri = ($uri instanceof Uri) ? $uri : new Uri('');
         $this->headers = ($headers instanceof Headers) ? $headers : new Headers();
         $this->method = $this->filterMethod($method);
 
