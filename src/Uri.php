@@ -73,8 +73,6 @@ class Uri implements UriInterface
     public function __construct(string $uri = '')
     {
         if ($uri !== '') {
-            $uri = \strtolower($uri);
-
             if (!$parts = parse_url($uri)) {
                 throw new InvalidArgumentException(sprintf("Unable to parse URI: %s", $uri));
             }
