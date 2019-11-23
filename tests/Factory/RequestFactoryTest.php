@@ -14,9 +14,10 @@ class RequestFactoryTest extends TestCase
     public function testRequestFactory()
     {
         $factory = new RequestFactory();
-        $request = $factory->createRequest('GET', 'https://example.com');
+        $request = $factory->createRequest('GET', 'https://example.com/foo/bar');
 
         $this->assertEquals('GET', $request->getMethod());
-        $this->assertEquals('https://example.com', (string)$request->getUri());
+        $this->assertEquals('/foo/bar', $request->getUri()->getPath());
+        $this->assertEquals('https://example.com/foo/bar', (string)$request->getUri());
     }
 }
