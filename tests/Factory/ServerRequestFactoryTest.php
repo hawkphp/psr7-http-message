@@ -17,15 +17,9 @@ class ServerRequestFactoryTest extends TestCase
     public function testConstructor()
     {
         $serverRequest = new ServerRequestFactory(new StreamFactory(), new UriFactory);
-        $request = $serverRequest->createServerRequest(
-            "POST",
-            new Uri("https://example.com"),
-            ['Foo' => ['Bar', 'Baz']]
-        );
+        $request = $serverRequest->createServerRequest("GET", new Uri("https://example.com/foo/bar"));
 
-        $this->assertEquals("POST", $request->getMethod());
-        $this->assertEquals("https://example.com", (string)$request->getUri());
-        $this->assertEquals(['Foo' => ['Bar', 'Baz']], $request->getHeaders());
-        $this->assertEquals("Bar,Baz", $request->getHeaderLine('Foo'));
+        $this->assertEquals("GET", $request->getMethod());
+        $this->assertEquals("https://example.com/foo/bar", (string)$request->getUri());
     }
 }
