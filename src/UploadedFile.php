@@ -47,25 +47,25 @@ class UploadedFile implements UploadedFileInterface
     private $needIsMove = false;
 
     /**
-     * @var
+     * @var string|null
      */
     private $clientFilename;
 
     /**
-     * @var
+     * @var string|null
      */
     private $clientMediaType;
 
     /**
      * UploadedFile constructor.
-     * @param StreamInterface $stream
+     * @param StreamInterface|string $stream
      * @param int|null $size
      * @param int $error
      * @param string|null $clientFilename
      * @param string|null $clientMediaType
      */
     public function __construct(
-        StreamInterface $stream,
+        $stream,
         int $size = null,
         int $error = \UPLOAD_ERR_OK,
         string $clientFilename = null,
@@ -74,14 +74,6 @@ class UploadedFile implements UploadedFileInterface
         $this->error = $error;
         $this->clientFilename = $clientFilename;
         $this->clientMediaType = $clientMediaType;
-
-        if (!is_string($clientMediaType) && $clientMediaType !== null) {
-            throw new \InvalidArgumentException('Upload file client media type must be a string or null');
-        }
-
-        if (!is_string($clientFilename) && $clientFilename !== null) {
-            throw new \InvalidArgumentException('Upload file client filename must be a string or null');
-        }
 
         if ($stream instanceof StreamInterface) {
             $file = $stream->getMetadata('uri');
