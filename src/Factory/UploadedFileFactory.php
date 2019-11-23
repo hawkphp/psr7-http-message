@@ -36,6 +36,6 @@ class UploadedFileFactory implements UploadedFileFactoryInterface
             $size = $stream->getSize();
         }
 
-        return new UploadedFile($file, $clientFilename, $clientMediaType, $size, $error);
+        return new UploadedFile($stream, $size, $error, $clientFilename, $clientMediaType);
     }
 }
