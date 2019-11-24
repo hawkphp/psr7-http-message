@@ -1,5 +1,5 @@
 {
-  "name": "hawk/psr7",
+  "name": "hawkphp/psr7",
   "type": "library",
   "description": "PSR-7 HTTP message implementation",
   "license": "MIT",
