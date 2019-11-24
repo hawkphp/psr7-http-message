@@ -2,11 +2,25 @@
 
 Repository contains a (strict) PSR-7 message implementation
 
-# Tests
+## Quickstart
+
+Installation:
+
+```bash
+composer require hawkphp/psr7
+```
+
+## Tests
 
 You can execute the test suite. You'll need to clone the repository and install the dependencies.
 
-# Contributing
+```bash
+$ git clone https://github.com/hawkphp/psr7-http-message
+$ composer install
+$ composer test
+```
+
+## Contributing
 Please, if you find errors, write to me about it. You can also do pull request.
 
 ## Pull Requests
