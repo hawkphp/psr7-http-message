@@ -1,5 +1,7 @@
 # Psr7 http-message
 
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+
 Repository contains a (strict) PSR-7 message implementation
 
 ## Quickstart
@@ -27,6 +29,3 @@ Please, if you find errors, write to me about it. You can also do pull request.
 1. Fork this repository
 2. Create a new branch for each feature 
 3. Send a pull request from each feature branch
-
-
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
