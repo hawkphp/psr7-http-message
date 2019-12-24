@@ -11,6 +11,10 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
 
+/**
+ * Class ServerRequestFactory
+ * @package Hawk\Psr7\Factory
+ */
 class ServerRequestFactory implements ServerRequestFactoryInterface
 {
     /**
@@ -55,13 +59,12 @@ class ServerRequestFactory implements ServerRequestFactoryInterface
             throw new InvalidArgumentException('URI must either be instance of UriInterface');
         }
 
-
         $body = $this->streamFactory->createStream();
         $headers = new Headers();
         $cookies = self::parseHeader($headers->getHeader('Cookie', []));
 
         if (!empty($serverParams)) {
-            $headers = Headers::createFromGlobals();
+            $headers = self::fromGlobals();
         }
 
         return new Request($method, $uri, $body, $headers, $serverParams, $cookies);
@@ -95,5 +98,40 @@ class ServerRequestFactory implements ServerRequestFactoryInterface
             }
         }
         return $cookies;
+    }
+
+    /**
+     * @return Request
+     */
+    public static function fromGlobals(): Request
+    {
+        $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
+        $uri = (new UriFactory())->createFromGlobals($_SERVER);
+
+        $headers = Headers::createFromGlobals();
+        $cookies = self::parseHeader($headers->getHeader('Cookie', []));
+
+        // Cache the php://input stream as it cannot be re-read
+        $cacheResource = fopen('php://temp', 'wb+');
+        $cache = $cacheResource ? new Stream($cacheResource) : null;
+
+        $body = (new StreamFactory())->createStreamFromFile('php://input', 'r', $cache);
+        $uploadedFiles = UploadedFile::createFromGlobals($_SERVER);
+
+        $request = new Request($method, $uri, $headers, $cookies, $_SERVER, $body, $uploadedFiles);
+        $contentTypes = $request->getHeader('Content-Type') ?? [];
+
+        $parsedContentType = '';
+        foreach ($contentTypes as $contentType) {
+            $fragments = explode(';', $contentType);
+            $parsedContentType = current($fragments);
+        }
+
+        $contentTypesWithParsedBodies = ['application/x-www-form-urlencoded', 'multipart/form-data'];
+        if ($method === 'POST' && in_array($parsedContentType, $contentTypesWithParsedBodies)) {
+            return $request->withParsedBody($_POST);
+        }
+
+        return $request;
     }
 }
