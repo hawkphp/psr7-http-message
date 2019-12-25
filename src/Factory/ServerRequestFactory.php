@@ -79,14 +79,17 @@ class ServerRequestFactory implements ServerRequestFactoryInterface
         if (is_array($header)) {
             $header = isset($header[0]) ? $header[0] : '';
         }
+
         if (!is_string($header)) {
             throw new InvalidArgumentException('Cannot parse Cookie data. Header value must be a string.');
         }
+
         $header = rtrim($header, "\r\n");
-        $pieces = preg_split('@[;]\s*@', $header);
+        $pcs = preg_split('@[;]\s*@', $header);
         $cookies = [];
-        if (is_array($pieces)) {
-            foreach ($pieces as $cookie) {
+
+        if (is_array($pcs)) {
+            foreach ($pcs as $cookie) {
                 $cookie = explode('=', $cookie, 2);
                 if (count($cookie) === 2) {
                     $key = urldecode($cookie[0]);

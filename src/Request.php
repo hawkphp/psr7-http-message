@@ -77,12 +77,13 @@ class Request extends Message implements ServerRequestInterface
 
     /**
      * Request constructor.
-     * @param string|null $method
      * @param string|UriInterface $uri
+     * @param string|null $method
      * @param null|array|Headers $headers
      * @param null|string|StreamInterface $body
+     * @param array $cookies
      */
-    public function __construct($uri = '', $method = "GET", $headers = null, $body = null)
+    public function __construct($uri = '', $method = "GET", $headers = null, $body = null, $cookies = [])
     {
         if (is_array($headers)) {
             $headers = new Headers($headers);
@@ -97,6 +98,7 @@ class Request extends Message implements ServerRequestInterface
         }
 
         $this->attributes = [];
+        $this->cookies = is_array($cookies) ? $cookies : [];
         $this->body = ($body instanceof Stream) ? $body : (new StreamFactory())->createStream('');
         $this->uri = ($uri instanceof Uri) ? $uri : new Uri('');
         $this->headers = ($headers instanceof Headers) ? $headers : new Headers();
