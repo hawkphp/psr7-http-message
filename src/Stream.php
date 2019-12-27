@@ -18,37 +18,37 @@ class Stream implements StreamInterface
     /**
      * @var resource|null
      */
-    private $resource;
+    protected $resource;
 
     /**
      * @var mixed
      */
-    private $size;
+    protected $size;
 
     /**
      * @var array|null
      */
-    private $meta;
+    protected $meta;
 
     /**
      * @var bool
      */
-    private $writable = false;
+    protected $writable = false;
 
     /**
      * @var bool
      */
-    private $readable = false;
+    protected $readable = false;
 
     /**
      * @var bool
      */
-    private $seekable = false;
+    protected $seekable = false;
 
     /**
      * @var array|mixed|null
      */
-    private $uri;
+    protected $uri;
 
     /**
      * Stream constructor.
