@@ -35,7 +35,7 @@ class Request extends Message implements ServerRequestInterface
     /**
      * @var array
      */
-    protected $cookies;
+    protected $cookieParams;
 
     /**
      * @var array
@@ -98,7 +98,7 @@ class Request extends Message implements ServerRequestInterface
         }
 
         $this->attributes = [];
-        $this->cookies = is_array($cookies) ? $cookies : [];
+        $this->cookieParams = is_array($cookies) ? $cookies : [];
         $this->body = ($body instanceof Stream) ? $body : (new StreamFactory())->createStream('');
         $this->uri = ($uri instanceof Uri) ? $uri : new Uri('');
         $this->headers = ($headers instanceof Headers) ? $headers : new Headers();
@@ -229,7 +229,7 @@ class Request extends Message implements ServerRequestInterface
      */
     public function getCookieParams(): array
     {
-        return $this->cookies;
+        return $this->cookieParams;
     }
 
     /**
@@ -238,7 +238,7 @@ class Request extends Message implements ServerRequestInterface
     public function withCookieParams(array $cookies)
     {
         $clone = clone $this;
-        $clone->cookies = $cookies;
+        $clone->cookieParams = $cookies;
 
         return $clone;
     }
