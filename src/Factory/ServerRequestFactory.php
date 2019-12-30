@@ -104,37 +104,40 @@ class ServerRequestFactory implements ServerRequestFactoryInterface
     }
 
     /**
-     * @return Request
+     * @param array|null $server
+     * @param array|null $query
+     * @param array|null $body
+     * @param array|null $cookies
+     * @param array|null $files
+     * @return ServerRequest
      */
-    public static function fromGlobals(): Request
-    {
-        $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
-        $uri = (new UriFactory())->createFromGlobals($_SERVER);
-
-        $headers = Headers::createFromGlobals();
-        $cookies = self::parseHeader($headers->getHeader('Cookie', []));
-
-        // Cache the php://input stream as it cannot be re-read
-        $cacheResource = fopen('php://temp', 'wb+');
-        $cache = $cacheResource ? new Stream($cacheResource) : null;
-
-        $body = (new StreamFactory())->createStreamFromFile('php://input', 'r', $cache);
-        $uploadedFiles = UploadedFile::createFromGlobals($_SERVER);
-
-        $request = new Request($method, $uri, $headers, $cookies, $_SERVER, $body, $uploadedFiles);
-        $contentTypes = $request->getHeader('Content-Type') ?? [];
-
-        $parsedContentType = '';
-        foreach ($contentTypes as $contentType) {
-            $fragments = explode(';', $contentType);
-            $parsedContentType = current($fragments);
+    public static function fromGlobals(
+        array $server = null,
+        array $query = null,
+        array $body = null,
+        array $cookies = null,
+        array $files = null
+    ) : ServerRequest {
+        $server = normalizeServer(
+            $server ?: $_SERVER,
+            is_callable(self::$apacheRequestHeaders) ? self::$apacheRequestHeaders : null
+        );
+        $files   = normalizeUploadedFiles($files ?: $_FILES);
+        $headers = marshalHeadersFromSapi($server);
+        if (null === $cookies && array_key_exists('cookie', $headers)) {
+            $cookies = parseCookieHeader($headers['cookie']);
         }
-
-        $contentTypesWithParsedBodies = ['application/x-www-form-urlencoded', 'multipart/form-data'];
-        if ($method === 'POST' && in_array($parsedContentType, $contentTypesWithParsedBodies)) {
-            return $request->withParsedBody($_POST);
-        }
-
-        return $request;
+        return new ServerRequest(
+            $server,
+            $files,
+            marshalUriFromSapi($server, $headers),
+            marshalMethodFromSapi($server),
+            'php://input',
+            $headers,
+            $cookies ?: $_COOKIE,
+            $query ?: $_GET,
+            $body ?: $_POST,
+            marshalProtocolVersionFromSapi($server)
+        );
     }
 }
